@@ -1,3 +1,4 @@
+mod areas;
 mod meteor;
 
 fn main() {
