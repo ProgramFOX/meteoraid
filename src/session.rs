@@ -6,11 +6,11 @@ use crate::timestamp::Timestamp;
 pub enum Event {
     Clouds(u8),
     AreaCounting(usize, Area),
-    BeginPeriod,
     BreakStart,
     BreakEnd,
-    EndPeriod,
+    NewPeriod,
     Meteor(Meteor),
+    Field(Field),
 }
 
 pub struct TimestampedEvent(Timestamp, Event);
