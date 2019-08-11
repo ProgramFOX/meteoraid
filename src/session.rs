@@ -13,7 +13,7 @@ pub enum Event {
     Meteor(Meteor),
 }
 
-pub enum TimestampedEvent(Timestamp, Event)
+pub struct TimestampedEvent(Timestamp, Event);
 
 pub struct Period {
     pub start_time: u32,
