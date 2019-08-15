@@ -16,8 +16,8 @@ pub enum Event {
 pub struct TimestampedEvent(Timestamp, Event);
 
 pub struct Period {
-    pub start_time: u32,
-    pub end_time: u32,
+    pub start_time: Timestamp,
+    pub end_time: Timestamp,
     pub teff: f64,
     pub limiting_magnitude: f64,
     pub field: Field,

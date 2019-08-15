@@ -1,6 +1,7 @@
 use crate::field::Field;
 use crate::meteor::{Meteor, Shower};
 use crate::session::*;
+use crate::timestamp::Timestamp;
 
 pub struct SessionBuilder {
     periods: Vec<Period>,
@@ -22,13 +23,22 @@ impl SessionBuilder {
         })
     }
 
-    pub fn register_event(&mut self, event: &Event) {}
+    pub fn register_event(&mut self, event: &Event) -> Result<(), BuilderError> {
+        match event {
+            Event::NewPeriod => {
+                let mut c = IncompletePeriod::new();
+                std::mem::swap(&mut c, &mut self.current);
+                self.periods.push(c.to_period()?);
+                Ok(())
+            }
+            _ => Ok(()),
+        }
+    }
 }
 
 struct IncompletePeriod {
-    start_time: Option<u32>,
-    end_time: Option<u32>,
-    teff: Option<f64>,
+    start_time: Option<Timestamp>,
+    end_time: Option<Timestamp>,
     limiting_magnitude: Option<f64>,
     field: Option<Field>,
     cloud_factor: Option<f64>,
@@ -41,7 +51,6 @@ impl IncompletePeriod {
         IncompletePeriod {
             start_time: None,
             end_time: None,
-            teff: None,
             limiting_magnitude: None,
             field: None,
             cloud_factor: None,
@@ -54,14 +63,12 @@ impl IncompletePeriod {
         if let (
             Some(start_time),
             Some(end_time),
-            Some(teff),
             Some(limiting_magnitude),
             Some(field),
             Some(cloud_factor),
         ) = (
             &self.start_time,
             &self.end_time,
-            &self.teff,
             &self.limiting_magnitude,
             &self.field,
             &self.cloud_factor,
@@ -69,7 +76,7 @@ impl IncompletePeriod {
             Ok(Period {
                 start_time: *start_time,
                 end_time: *end_time,
-                teff: *teff,
+                teff: (*end_time - *start_time) as f64 / 60f64,
                 limiting_magnitude: *limiting_magnitude,
                 field: *field,
                 cloud_factor: *cloud_factor,
