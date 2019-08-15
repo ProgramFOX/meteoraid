@@ -15,7 +15,7 @@ impl SessionBuilder {
         }
     }
 
-    pub fn to_session(mut self) -> Result<Session, ()> {
+    pub fn to_session(mut self) -> Result<Session, BuilderError> {
         self.periods.push(self.current.to_period()?);
         Ok(Session {
             periods: self.periods,
@@ -32,7 +32,7 @@ struct IncompletePeriod {
     limiting_magnitude: Option<f64>,
     field: Option<Field>,
     cloud_factor: Option<f64>,
-    showers: Option<Vec<Shower>>,
+    showers: Vec<Shower>,
     meteors: Vec<Meteor>,
 }
 
@@ -45,7 +45,7 @@ impl IncompletePeriod {
             limiting_magnitude: None,
             field: None,
             cloud_factor: None,
-            showers: None,
+            showers: vec![],
             meteors: vec![],
         }
     }
@@ -58,39 +58,38 @@ impl IncompletePeriod {
             Some(limiting_magnitude),
             Some(field),
             Some(cloud_factor),
-            Some(showers),
         ) = (
-            self.start_time,
-            self.end_time,
-            self.teff,
-            self.limiting_magnitude,
-            self.field,
-            self.cloud_factor,
-            self.showers,
+            &self.start_time,
+            &self.end_time,
+            &self.teff,
+            &self.limiting_magnitude,
+            &self.field,
+            &self.cloud_factor,
         ) {
             Ok(Period {
-                start_time,
-                end_time,
-                teff,
-                limiting_magnitude,
-                field,
-                cloud_factor,
-                showers,
+                start_time: *start_time,
+                end_time: *end_time,
+                teff: *teff,
+                limiting_magnitude: *limiting_magnitude,
+                field: *field,
+                cloud_factor: *cloud_factor,
+                showers: self.showers,
                 meteors: self.meteors,
             })
         } else {
             match (
-                self.start_time.is_none(),
-                self.end_time.is_none(),
-                self.limiting_magnitude.is_none(),
-                self.field.is_none(),
-                self.cloud_factor.is_none(),
-                self.showers.is_none(),
+                &self.start_time.is_none(),
+                &self.end_time.is_none(),
+                &self.limiting_magnitude.is_none(),
+                &self.field.is_none(),
+                &self.cloud_factor.is_none(),
             ) {
-                (true, _, _, _, _, _) => Err(BuilderError::NoStartTime),
-                (_, true, _, _, _, _) => Err(BuilderError::NoEndTime),
-                (_, _, true, _, _, _) => Err(BuilderError::NoLm),
-                (_, _, _, true, _, _) => Err(BuilderError::NoField),
+                (true, _, _, _, _) => Err(BuilderError::NoStartTime),
+                (_, true, _, _, _) => Err(BuilderError::NoEndTime),
+                (_, _, true, _, _) => Err(BuilderError::NoLm),
+                (_, _, _, true, _) => Err(BuilderError::NoField),
+                (_, _, _, _, true) => Err(BuilderError::NoF),
+                _ => Err(BuilderError::Unknown),
             }
         }
     }
@@ -103,12 +102,14 @@ pub enum BuilderError {
     NoLm,
     NoField,
     NoF,
+    Unknown,
 }
 
 impl std::fmt::Display for BuilderError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(
             f,
+            "{}",
             match self {
                 BuilderError::NoStartTime => "No start time given for this period.",
                 BuilderError::NoEndTime => "No end time given for this period.",
@@ -117,7 +118,10 @@ impl std::fmt::Display for BuilderError {
                 }
                 BuilderError::NoField => "No field given for this period.",
                 BuilderError::NoF => "No cloud information given for this period.",
+                BuilderError::Unknown => "unexpected error",
             }
         )
     }
 }
+
+impl std::error::Error for BuilderError {}
