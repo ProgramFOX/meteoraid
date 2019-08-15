@@ -59,6 +59,7 @@ struct IncompletePeriod {
     cloud_factor: Option<f64>,
     showers: Vec<Shower>,
     meteors: Vec<Meteor>,
+    areasCounted: Vec<(usize, Area, Timestamp)>,
 }
 
 impl IncompletePeriod {
@@ -71,6 +72,7 @@ impl IncompletePeriod {
             cloud_factor: None,
             showers: vec![],
             meteors: vec![],
+            areasCounted: vec![],
         }
     }
 
