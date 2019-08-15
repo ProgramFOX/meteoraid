@@ -23,18 +23,29 @@ impl SessionBuilder {
         })
     }
 
-    pub fn register_event(&mut self, time_and_event: &TimestampedEvent) -> Result<(), BuilderError> {
+    pub fn register_event(
+        &mut self,
+        time_and_event: &TimestampedEvent,
+    ) -> Result<(), BuilderError> {
         let TimestampedEvent(timestamp, event) = time_and_event;
         match event {
             Event::NewPeriod => {
                 let mut c = IncompletePeriod::new();
                 std::mem::swap(&mut c, &mut self.current);
                 self.periods.push(c.to_period()?);
-            },
+            }
             Event::Meteor(meteor) => {
                 self.current.meteors.push(*meteor);
             }
-            _ => {},
+            Event::Field(field) => match self.current.field {
+                Some(_) => {
+                    Err(BuilderError::AlreadyField)?;
+                }
+                None => {
+                    self.current.field = Some(*field);
+                }
+            },
+            _ => {}
         };
         Ok(())
     }
@@ -113,6 +124,7 @@ pub enum BuilderError {
     NoLm,
     NoField,
     NoF,
+    AlreadyField,
     Unknown,
 }
 
@@ -129,6 +141,7 @@ impl std::fmt::Display for BuilderError {
                 }
                 BuilderError::NoField => "No field given for this period.",
                 BuilderError::NoF => "No cloud information given for this period.",
+                BuilderError::AlreadyField => "You already specified a field for this period.",
                 BuilderError::Unknown => "unexpected error",
             }
         )
