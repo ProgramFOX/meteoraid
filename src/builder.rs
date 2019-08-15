@@ -22,8 +22,7 @@ impl SessionBuilder {
         })
     }
 
-    pub fn register_event(&mut self, event: &Event) {
-    }
+    pub fn register_event(&mut self, event: &Event) {}
 }
 
 struct IncompletePeriod {
@@ -51,7 +50,7 @@ impl IncompletePeriod {
         }
     }
 
-    fn to_period(self) -> Result<Period, ()> {
+    fn to_period(self) -> Result<Period, BuilderError> {
         if let (
             Some(start_time),
             Some(end_time),
@@ -80,7 +79,45 @@ impl IncompletePeriod {
                 meteors: self.meteors,
             })
         } else {
-            Err(())
+            match (
+                self.start_time.is_none(),
+                self.end_time.is_none(),
+                self.limiting_magnitude.is_none(),
+                self.field.is_none(),
+                self.cloud_factor.is_none(),
+                self.showers.is_none(),
+            ) {
+                (true, _, _, _, _, _) => Err(BuilderError::NoStartTime),
+                (_, true, _, _, _, _) => Err(BuilderError::NoEndTime),
+                (_, _, true, _, _, _) => Err(BuilderError::NoLm),
+                (_, _, _, true, _, _) => Err(BuilderError::NoField),
+            }
         }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub enum BuilderError {
+    NoStartTime,
+    NoEndTime,
+    NoLm,
+    NoField,
+    NoF,
+}
+
+impl std::fmt::Display for BuilderError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(
+            f,
+            match self {
+                BuilderError::NoStartTime => "No start time given for this period.",
+                BuilderError::NoEndTime => "No end time given for this period.",
+                BuilderError::NoLm => {
+                    "No areas for the calculation of limiting magnitude are counted."
+                }
+                BuilderError::NoField => "No field given for this period.",
+                BuilderError::NoF => "No cloud information given for this period.",
+            }
+        )
     }
 }
