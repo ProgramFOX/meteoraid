@@ -1,8 +1,10 @@
+#[derive(Copy, Clone)]
 pub struct Meteor {
     shower: Shower,
     magnitude: i32,
 }
 
+#[derive(Copy, Clone)]
 pub enum Shower {
     Quadrantids,
     Lyrids,

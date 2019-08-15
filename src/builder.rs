@@ -30,10 +30,13 @@ impl SessionBuilder {
                 let mut c = IncompletePeriod::new();
                 std::mem::swap(&mut c, &mut self.current);
                 self.periods.push(c.to_period()?);
-                Ok(())
+            },
+            Event::Meteor(meteor) => {
+                self.current.meteors.push(*meteor);
             }
-            _ => Ok(()),
-        }
+            _ => {},
+        };
+        Ok(())
     }
 }
 
