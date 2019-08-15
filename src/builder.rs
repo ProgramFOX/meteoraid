@@ -23,7 +23,8 @@ impl SessionBuilder {
         })
     }
 
-    pub fn register_event(&mut self, event: &Event) -> Result<(), BuilderError> {
+    pub fn register_event(&mut self, time_and_event: &TimestampedEvent) -> Result<(), BuilderError> {
+        let TimestampedEvent(timestamp, event) = time_and_event;
         match event {
             Event::NewPeriod => {
                 let mut c = IncompletePeriod::new();

@@ -13,7 +13,7 @@ pub enum Event {
     Field(Field),
 }
 
-pub struct TimestampedEvent(Timestamp, Event);
+pub struct TimestampedEvent(pub Timestamp, pub Event);
 
 pub struct Period {
     pub start_time: Timestamp,
