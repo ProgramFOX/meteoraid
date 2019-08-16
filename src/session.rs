@@ -5,7 +5,7 @@ use crate::timestamp::Timestamp;
 
 pub enum Event {
     Clouds(u8),
-    AreaCounting(usize, Area),
+    AreasCounted(Vec<(usize, Area)>),
     BreakStart,
     BreakEnd,
     NewPeriod,
