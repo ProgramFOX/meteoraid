@@ -26,6 +26,14 @@ impl SessionBuilder {
 
     pub fn register_event(&mut self, time_and_event: TimestampedEvent) -> Result<(), BuilderError> {
         let TimestampedEvent(timestamp, event) = time_and_event;
+
+        if self.current.current_break.is_some() {
+            match event {
+                Event::BreakEnd => {}
+                _ => Err(BuilderError::InBreak)?,
+            }
+        }
+
         match event {
             Event::NewPeriod => {
                 let mut c = IncompletePeriod::new();
@@ -58,7 +66,18 @@ impl SessionBuilder {
             Event::Meteor(meteor) => {
                 self.current.meteors.push(meteor);
             }
-            _ => {}
+            Event::BreakStart => {
+                self.current.current_break = Some(timestamp);
+            }
+            Event::BreakEnd => match self.current.current_break {
+                Some(br) => {
+                    self.current.breaks.push((br, timestamp));
+                    self.current.current_break = None;
+                }
+                None => {
+                    Err(BuilderError::NoBreakToEnd)?;
+                }
+            },
         };
         Ok(())
     }
@@ -74,6 +93,8 @@ struct IncompletePeriod {
     meteors: Vec<Meteor>,
     limiting_magnitudes: Vec<(f64, Timestamp)>,
     clouds: Vec<(u8, Timestamp)>,
+    breaks: Vec<(Timestamp, Timestamp)>,
+    current_break: Option<Timestamp>,
 }
 
 impl IncompletePeriod {
@@ -88,6 +109,8 @@ impl IncompletePeriod {
             meteors: vec![],
             limiting_magnitudes: vec![],
             clouds: vec![],
+            breaks: vec![],
+            current_break: None,
         }
     }
 
@@ -143,6 +166,8 @@ pub enum BuilderError {
     NoF,
     AlreadyField,
     InvalidLm,
+    InBreak,
+    NoBreakToEnd,
     Unknown,
 }
 
@@ -161,6 +186,8 @@ impl std::fmt::Display for BuilderError {
                 BuilderError::NoF => "No cloud information given for this period.",
                 BuilderError::AlreadyField => "You already specified a field for this period.",
                 BuilderError::InvalidLm => "Invalid data for calculating limiting magnitude.",
+                BuilderError::InBreak => "You can't register events during a break.",
+                BuilderError::NoBreakToEnd => "There is no ongoing break to end.",
                 BuilderError::Unknown => "unexpected error",
             }
         )
