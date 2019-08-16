@@ -52,6 +52,9 @@ impl SessionBuilder {
                     None => Err(BuilderError::InvalidLm)?,
                 }
             }
+            Event::Clouds(clouds) => {
+                self.current.clouds.push((clouds, timestamp));
+            }
             _ => {}
         };
         Ok(())
@@ -67,6 +70,7 @@ struct IncompletePeriod {
     showers: Vec<Shower>,
     meteors: Vec<Meteor>,
     limiting_magnitudes: Vec<(f64, Timestamp)>,
+    clouds: Vec<(u8, Timestamp)>,
 }
 
 impl IncompletePeriod {
@@ -80,6 +84,7 @@ impl IncompletePeriod {
             showers: vec![],
             meteors: vec![],
             limiting_magnitudes: vec![],
+            clouds: vec![],
         }
     }
 
