@@ -1,3 +1,4 @@
+use crate::areas::get_limiting_magnitude_avg;
 use crate::field::Field;
 use crate::meteor::{Meteor, Shower};
 use crate::session::*;
@@ -23,10 +24,7 @@ impl SessionBuilder {
         })
     }
 
-    pub fn register_event(
-        &mut self,
-        time_and_event: &TimestampedEvent,
-    ) -> Result<(), BuilderError> {
+    pub fn register_event(&mut self, time_and_event: TimestampedEvent) -> Result<(), BuilderError> {
         let TimestampedEvent(timestamp, event) = time_and_event;
         match event {
             Event::NewPeriod => {
@@ -35,16 +33,25 @@ impl SessionBuilder {
                 self.periods.push(c.to_period()?);
             }
             Event::Meteor(meteor) => {
-                self.current.meteors.push(*meteor);
+                self.current.meteors.push(meteor);
             }
             Event::Field(field) => match self.current.field {
                 Some(_) => {
                     Err(BuilderError::AlreadyField)?;
                 }
                 None => {
-                    self.current.field = Some(*field);
+                    self.current.field = Some(field);
                 }
             },
+            Event::AreasCounted(counts) => {
+                let maybe_lm_avg = get_limiting_magnitude_avg(counts);
+                match maybe_lm_avg {
+                    Some(lm_avg) => {
+                        self.current.limiting_magnitudes.push((lm_avg, timestamp));
+                    }
+                    None => Err(BuilderError::InvalidLm)?,
+                }
+            }
             _ => {}
         };
         Ok(())
@@ -59,6 +66,7 @@ struct IncompletePeriod {
     cloud_factor: Option<f64>,
     showers: Vec<Shower>,
     meteors: Vec<Meteor>,
+    limiting_magnitudes: Vec<(f64, Timestamp)>,
 }
 
 impl IncompletePeriod {
@@ -71,6 +79,7 @@ impl IncompletePeriod {
             cloud_factor: None,
             showers: vec![],
             meteors: vec![],
+            limiting_magnitudes: vec![],
         }
     }
 
@@ -125,6 +134,7 @@ pub enum BuilderError {
     NoField,
     NoF,
     AlreadyField,
+    InvalidLm,
     Unknown,
 }
 
@@ -142,6 +152,7 @@ impl std::fmt::Display for BuilderError {
                 BuilderError::NoField => "No field given for this period.",
                 BuilderError::NoF => "No cloud information given for this period.",
                 BuilderError::AlreadyField => "You already specified a field for this period.",
+                BuilderError::InvalidLm => "Invalid data for calculating limiting magnitude.",
                 BuilderError::Unknown => "unexpected error",
             }
         )
