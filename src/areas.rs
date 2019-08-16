@@ -295,13 +295,13 @@ mod tests {
             ]),
             None
         );
+    }
 
-        #[test]
-        pub fn test_limiting_magnitude_average_7() {
-            assert_eq!(
-                get_limiting_magnitude_avg(vec![(110, Area(14)), (10, Area(70)), (153, Area(2))]),
-                None
-            );
-        }
+    #[test]
+    pub fn test_limiting_magnitude_average_7() {
+        assert_eq!(
+            get_limiting_magnitude_avg(vec![(110, Area(14)), (10, Area(70)), (153, Area(2))]),
+            None
+        );
     }
 }
