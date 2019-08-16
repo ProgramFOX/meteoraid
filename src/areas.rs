@@ -187,7 +187,7 @@ pub fn get_limiting_magnitude_avg(counts: Vec<(usize, Area)>) -> Option<f64> {
         .flatten()
         .collect();
 
-    if lms.len() == 0 {
+    if lms.len() == 0 || lms.len() != counts.len() {
         return None;
     } else if lms.len() == 1 {
         return Some(lms[0]);
@@ -280,7 +280,7 @@ mod tests {
                 (15, Area(2)),
                 (3, Area(35))
             ]),
-            Some(4.67)
+            None
         );
     }
 
@@ -293,7 +293,7 @@ mod tests {
                 (15, Area(2)),
                 (100, Area(3))
             ]),
-            Some(5.50)
+            None
         );
 
         #[test]
