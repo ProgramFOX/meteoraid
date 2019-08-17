@@ -13,6 +13,19 @@ impl Timestamp {
             minute: n % 100,
         }
     }
+
+    pub fn incl_is_between(&self, a: Timestamp, b: Timestamp) -> bool {
+        let b_hour = if b.hour < a.hour { b.hour + 24 } else { b.hour };
+        let self_hour = if self.hour < a.hour {
+            self.hour + 24
+        } else {
+            self.hour
+        };
+        let a_total_min = a.hour * 60 + a.minute;
+        let self_total_min = self_hour * 60 + self.minute;
+        let b_total_min = b_hour * 60 + b.minute;
+        a_total_min <= self_total_min && self_total_min <= b_total_min
+    }
 }
 
 impl std::ops::Sub for Timestamp {
@@ -143,5 +156,118 @@ mod tests {
             minute: 17,
         };
         assert_eq!(t2 - t1, 1439);
+    }
+
+    #[test]
+    pub fn test_in_between_1() {
+        let t1 = Timestamp {
+            hour: 15,
+            minute: 18,
+        };
+        let t2 = Timestamp {
+            hour: 16,
+            minute: 7,
+        };
+        let t3 = Timestamp {
+            hour: 20,
+            minute: 50,
+        };
+        assert!(t2.incl_is_between(t1, t3));
+        assert!(!t1.incl_is_between(t2, t3));
+        assert!(!t3.incl_is_between(t1, t2));
+    }
+
+    #[test]
+    pub fn test_in_between_2() {
+        let t1 = Timestamp {
+            hour: 22,
+            minute: 18,
+        };
+        let t2 = Timestamp {
+            hour: 23,
+            minute: 7,
+        };
+        let t3 = Timestamp {
+            hour: 0,
+            minute: 50,
+        };
+        assert!(t2.incl_is_between(t1, t3));
+        assert!(!t1.incl_is_between(t2, t3));
+        assert!(!t3.incl_is_between(t1, t2));
+    }
+
+    #[test]
+    pub fn test_in_between_3() {
+        let t1 = Timestamp {
+            hour: 22,
+            minute: 18,
+        };
+        let t2 = Timestamp { hour: 0, minute: 7 };
+        let t3 = Timestamp {
+            hour: 00,
+            minute: 50,
+        };
+        assert!(t2.incl_is_between(t1, t3));
+        assert!(!t1.incl_is_between(t2, t3));
+        assert!(!t3.incl_is_between(t1, t2));
+    }
+
+    #[test]
+    pub fn test_in_between_4() {
+        let t1 = Timestamp {
+            hour: 23,
+            minute: 18,
+        };
+        let t2 = Timestamp { hour: 0, minute: 7 };
+        let t3 = Timestamp {
+            hour: 23,
+            minute: 50,
+        };
+        assert!(!t2.incl_is_between(t1, t3));
+    }
+
+    #[test]
+    pub fn test_in_between_5() {
+        let t1 = Timestamp {
+            hour: 23,
+            minute: 18,
+        };
+        let t2 = Timestamp {
+            hour: 23,
+            minute: 18,
+        };
+        let t3 = Timestamp {
+            hour: 23,
+            minute: 50,
+        };
+        assert!(t2.incl_is_between(t1, t3));
+        assert!(t1.incl_is_between(t2, t3));
+    }
+
+    #[test]
+    pub fn test_in_between_6() {
+        let t1 = Timestamp {
+            hour: 23,
+            minute: 18,
+        };
+        let t2 = Timestamp {
+            hour: 23,
+            minute: 50,
+        };
+        let t3 = Timestamp {
+            hour: 23,
+            minute: 50,
+        };
+        assert!(t2.incl_is_between(t1, t3));
+        assert!(t3.incl_is_between(t1, t2));
+    }
+
+    #[test]
+    pub fn test_in_between_7() {
+        let t1 = Timestamp {
+            hour: 23,
+            minute: 18,
+        };
+        assert!(t1.incl_is_between(t1, t1));
     }
 }
