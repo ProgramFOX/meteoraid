@@ -40,6 +40,12 @@ impl SessionBuilder {
                 std::mem::swap(&mut c, &mut self.current);
                 self.periods.push(c.to_period()?);
             }
+            Event::PeriodStart => {
+                self.current.start_time = Some(timestamp);
+            }
+            Event::PeriodEnd => {
+                self.current.end_time = Some(timestamp);
+            }
             Event::Meteor(meteor) => {
                 self.current.meteors.push(meteor);
             }

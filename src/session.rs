@@ -11,6 +11,8 @@ pub enum Event {
     NewPeriod,
     Meteor(Meteor),
     Field(Field),
+    PeriodStart,
+    PeriodEnd,
 }
 
 pub struct TimestampedEvent(pub Timestamp, pub Event);
