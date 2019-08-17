@@ -28,6 +28,24 @@ impl Timestamp {
     }
 }
 
+pub fn effective_time_minutes(
+    start: Timestamp,
+    end: Timestamp,
+    breaks: &Vec<(Timestamp, Timestamp)>,
+) -> Option<u32> {
+    let mut minutes = end - start;
+    for b in breaks {
+        if b.0.incl_is_between(start, end) ^ b.1.incl_is_between(start, end) {
+            return None;
+            // a break can only be entirely outside or inside the start -> end period
+        }
+        if b.0.incl_is_between(start, end) {
+            minutes -= b.1 - b.0;
+        }
+    }
+    Some(minutes)
+}
+
 impl std::ops::Sub for Timestamp {
     type Output = u32;
 
@@ -269,5 +287,231 @@ mod tests {
             minute: 18,
         };
         assert!(t1.incl_is_between(t1, t1));
+    }
+
+    #[test]
+    pub fn test_effective_time_1() {
+        let t1 = Timestamp {
+            hour: 15,
+            minute: 16,
+        };
+        let t2 = Timestamp {
+            hour: 16,
+            minute: 27,
+        };
+        assert_eq!(effective_time_minutes(t1, t2, &vec![]), Some(71));
+    }
+
+    #[test]
+    pub fn test_effective_time_2() {
+        let t1 = Timestamp {
+            hour: 15,
+            minute: 16,
+        };
+        let t2 = Timestamp {
+            hour: 16,
+            minute: 27,
+        };
+        let breaks: Vec<(Timestamp, Timestamp)> = vec![
+            (
+                Timestamp {
+                    hour: 15,
+                    minute: 18,
+                },
+                Timestamp {
+                    hour: 15,
+                    minute: 20,
+                },
+            ),
+            (
+                Timestamp {
+                    hour: 16,
+                    minute: 24,
+                },
+                Timestamp {
+                    hour: 16,
+                    minute: 26,
+                },
+            ),
+        ];
+        assert_eq!(effective_time_minutes(t1, t2, &breaks), Some(67));
+    }
+
+    #[test]
+    pub fn test_effective_time_3() {
+        let t1 = Timestamp {
+            hour: 15,
+            minute: 16,
+        };
+        let t2 = Timestamp {
+            hour: 16,
+            minute: 27,
+        };
+        let breaks: Vec<(Timestamp, Timestamp)> = vec![
+            (
+                Timestamp {
+                    hour: 15,
+                    minute: 18,
+                },
+                Timestamp {
+                    hour: 15,
+                    minute: 20,
+                },
+            ),
+            (
+                Timestamp {
+                    hour: 16,
+                    minute: 24,
+                },
+                Timestamp {
+                    hour: 16,
+                    minute: 26,
+                },
+            ),
+            (
+                Timestamp {
+                    hour: 17,
+                    minute: 30,
+                },
+                Timestamp {
+                    hour: 17,
+                    minute: 53,
+                },
+            ),
+        ];
+        assert_eq!(effective_time_minutes(t1, t2, &breaks), Some(67));
+    }
+
+    #[test]
+    pub fn test_effective_time_4() {
+        let t1 = Timestamp {
+            hour: 15,
+            minute: 16,
+        };
+        let t2 = Timestamp {
+            hour: 16,
+            minute: 27,
+        };
+        let breaks: Vec<(Timestamp, Timestamp)> = vec![
+            (
+                Timestamp {
+                    hour: 15,
+                    minute: 18,
+                },
+                Timestamp {
+                    hour: 15,
+                    minute: 20,
+                },
+            ),
+            (
+                Timestamp {
+                    hour: 16,
+                    minute: 24,
+                },
+                Timestamp {
+                    hour: 17,
+                    minute: 26,
+                },
+            ),
+        ];
+        assert_eq!(effective_time_minutes(t1, t2, &breaks), None);
+    }
+
+    #[test]
+    pub fn test_effective_time_5() {
+        let t1 = Timestamp {
+            hour: 15,
+            minute: 16,
+        };
+        let t2 = Timestamp {
+            hour: 16,
+            minute: 27,
+        };
+        let breaks: Vec<(Timestamp, Timestamp)> = vec![
+            (
+                Timestamp {
+                    hour: 15,
+                    minute: 13,
+                },
+                Timestamp {
+                    hour: 15,
+                    minute: 20,
+                },
+            ),
+            (
+                Timestamp {
+                    hour: 16,
+                    minute: 24,
+                },
+                Timestamp {
+                    hour: 16,
+                    minute: 26,
+                },
+            ),
+        ];
+        assert_eq!(effective_time_minutes(t1, t2, &breaks), None);
+    }
+
+    #[test]
+    pub fn test_effective_time_6() {
+        let t1 = Timestamp {
+            hour: 23,
+            minute: 16,
+        };
+        let t2 = Timestamp {
+            hour: 0,
+            minute: 27,
+        };
+        let breaks: Vec<(Timestamp, Timestamp)> = vec![(
+            Timestamp {
+                hour: 23,
+                minute: 50,
+            },
+            Timestamp { hour: 0, minute: 2 },
+        )];
+        assert_eq!(effective_time_minutes(t1, t2, &breaks), Some(59));
+    }
+
+    #[test]
+    pub fn test_effective_time_7() {
+        let t1 = Timestamp {
+            hour: 23,
+            minute: 16,
+        };
+        let t2 = Timestamp {
+            hour: 0,
+            minute: 27,
+        };
+        let breaks: Vec<(Timestamp, Timestamp)> = vec![(
+            Timestamp {
+                hour: 23,
+                minute: 50,
+            },
+            Timestamp {
+                hour: 0,
+                minute: 28,
+            },
+        )];
+        assert_eq!(effective_time_minutes(t1, t2, &breaks), None);
+    }
+
+    #[test]
+    pub fn test_effective_time_8() {
+        let t1 = Timestamp {
+            hour: 23,
+            minute: 16,
+        };
+        let t2 = Timestamp {
+            hour: 0,
+            minute: 27,
+        };
+        let breaks: Vec<(Timestamp, Timestamp)> = vec![(
+            Timestamp {
+                hour: 23,
+                minute: 5,
+            },
+            Timestamp { hour: 0, minute: 2 },
+        )];
+        assert_eq!(effective_time_minutes(t1, t2, &breaks), None);
     }
 }
