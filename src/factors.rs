@@ -1,9 +1,9 @@
 pub fn cloud_factor(cloud_estimates: Vec<(u8, u32)>) -> f64 {
     let teff = cloud_estimates.iter().fold(0u32, |acc, &item| acc + item.1);
     let k = (1f64 / teff as f64)
-        * (cloud_estimates
-            .iter()
-            .fold(0f64, |acc, &item| acc + (item.0 as f64 / 100f64) * item.1 as f64));
+        * (cloud_estimates.iter().fold(0f64, |acc, &item| {
+            acc + (item.0 as f64 / 100f64) * item.1 as f64
+        }));
     ((1f64 / (1f64 - k)) * 100f64).round() / 100f64
 }
 
