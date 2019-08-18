@@ -2,8 +2,8 @@ use std::cmp::max;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Timestamp {
-    hour: u32,
-    minute: u32,
+    pub hour: u32,
+    pub minute: u32,
 }
 
 impl Timestamp {
