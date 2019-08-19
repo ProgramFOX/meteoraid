@@ -463,4 +463,406 @@ mod tests {
 
         assert_eq!(checkpoints_to_durations(&checkpoints, end, &breaks), None);
     }
+
+    use crate::areas::Area;
+
+    #[test]
+    fn test_builder_1() {
+        let mut builder = SessionBuilder::new();
+        let start = Timestamp {
+            hour: 22,
+            minute: 55,
+        };
+        let end = Timestamp {
+            hour: 1,
+            minute: 20,
+        };
+        builder
+            .register_event(TimestampedEvent(start, Event::PeriodStart))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::AreasCounted(vec![(10, Area(14))]),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(start, Event::Clouds(0)))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::Field(Field {
+                    ra: 290.0,
+                    dec: 55.0,
+                }),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                Timestamp {
+                    hour: 22,
+                    minute: 57,
+                },
+                Event::Meteor(Meteor {
+                    shower: Shower::Perseids,
+                    magnitude: 35,
+                }),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(end, Event::PeriodEnd))
+            .unwrap();
+
+        let session = builder.to_session().unwrap();
+        assert_eq!(session.periods.len(), 1);
+        let period = &session.periods[0];
+        assert_eq!(period.start_time, start);
+        assert_eq!(period.end_time, end);
+        assert_eq!(period.meteors.len(), 1);
+        assert_eq!(period.cloud_factor, 1.0);
+        assert_eq!(period.limiting_magnitude, 5.58);
+    }
+
+    #[test]
+    fn test_builder_2() {
+        let mut builder = SessionBuilder::new();
+        let start = Timestamp {
+            hour: 22,
+            minute: 55,
+        };
+        let end = Timestamp {
+            hour: 1,
+            minute: 20,
+        };
+        builder
+            .register_event(TimestampedEvent(start, Event::PeriodStart))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::AreasCounted(vec![(10, Area(14))]),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(start, Event::Clouds(0)))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::Field(Field {
+                    ra: 290.0,
+                    dec: 55.0,
+                }),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                Timestamp {
+                    hour: 22,
+                    minute: 57,
+                },
+                Event::Meteor(Meteor {
+                    shower: Shower::Perseids,
+                    magnitude: 35,
+                }),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(end, Event::PeriodEnd))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(end, Event::NewPeriod))
+            .unwrap();
+
+        let start2 = Timestamp {
+            hour: 1,
+            minute: 30,
+        };
+        let end2 = Timestamp { hour: 2, minute: 0 };
+        builder
+            .register_event(TimestampedEvent(start2, Event::PeriodStart))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start2,
+                Event::AreasCounted(vec![(11, Area(14))]),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(start2, Event::Clouds(5)))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start2,
+                Event::Field(Field {
+                    ra: 336.0,
+                    dec: 52.3,
+                }),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(end2, Event::PeriodEnd))
+            .unwrap();
+
+        let session = builder.to_session().unwrap();
+        assert_eq!(session.periods.len(), 2);
+        let period = &session.periods[0];
+        assert_eq!(period.start_time, start);
+        assert_eq!(period.end_time, end);
+        assert_eq!(period.meteors.len(), 1);
+        assert_eq!(period.cloud_factor, 1.0);
+        assert_eq!(period.limiting_magnitude, 5.58);
+        assert_eq!(period.field.ra, 290.0);
+
+        let period2 = &session.periods[1];
+        assert_eq!(period2.start_time, start2);
+        assert_eq!(period2.end_time, end2);
+        assert_eq!(period2.meteors.len(), 0);
+        assert_eq!(period2.cloud_factor, 1.05);
+        assert_eq!(period2.limiting_magnitude, 5.64);
+        assert_eq!(period2.field.ra, 336.0);
+    }
+
+    #[test]
+    fn test_builder_3() {
+        let mut builder = SessionBuilder::new();
+        let start = Timestamp {
+            hour: 22,
+            minute: 55,
+        };
+        let end = Timestamp {
+            hour: 1,
+            minute: 20,
+        };
+        builder
+            .register_event(TimestampedEvent(start, Event::PeriodStart))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(start, Event::Clouds(0)))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::Field(Field {
+                    ra: 290.0,
+                    dec: 55.0,
+                }),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                Timestamp {
+                    hour: 22,
+                    minute: 57,
+                },
+                Event::Meteor(Meteor {
+                    shower: Shower::Perseids,
+                    magnitude: 35,
+                }),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(end, Event::PeriodEnd))
+            .unwrap();
+
+        match builder.to_session() {
+            Err(BuilderError::NoLm) => {}
+            _ => panic!("to_session does not return NoLm"),
+        };
+    }
+
+    #[test]
+    fn test_builder_4() {
+        let mut builder = SessionBuilder::new();
+        let start = Timestamp {
+            hour: 22,
+            minute: 55,
+        };
+        let end = Timestamp {
+            hour: 1,
+            minute: 20,
+        };
+        builder
+            .register_event(TimestampedEvent(start, Event::PeriodStart))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::AreasCounted(vec![(10, Area(14))]),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::Field(Field {
+                    ra: 290.0,
+                    dec: 55.0,
+                }),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                Timestamp {
+                    hour: 22,
+                    minute: 57,
+                },
+                Event::Meteor(Meteor {
+                    shower: Shower::Perseids,
+                    magnitude: 35,
+                }),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(end, Event::PeriodEnd))
+            .unwrap();
+
+        match builder.to_session() {
+            Err(BuilderError::NoF) => {}
+            _ => panic!("to_session does not return NoF"),
+        };
+    }
+
+    #[test]
+    fn test_builder_5() {
+        let mut builder = SessionBuilder::new();
+        let start = Timestamp {
+            hour: 22,
+            minute: 55,
+        };
+        let end = Timestamp {
+            hour: 1,
+            minute: 20,
+        };
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::AreasCounted(vec![(10, Area(14))]),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(start, Event::Clouds(0)))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::Field(Field {
+                    ra: 290.0,
+                    dec: 55.0,
+                }),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                Timestamp {
+                    hour: 22,
+                    minute: 57,
+                },
+                Event::Meteor(Meteor {
+                    shower: Shower::Perseids,
+                    magnitude: 35,
+                }),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(end, Event::PeriodEnd))
+            .unwrap();
+
+        match builder.to_session() {
+            Err(BuilderError::NoStartTime) => {}
+            _ => panic!("to_session does not return NoStartTime"),
+        };
+    }
+
+    #[test]
+    fn test_builder_6() {
+        let mut builder = SessionBuilder::new();
+        let start = Timestamp {
+            hour: 22,
+            minute: 55,
+        };
+        builder
+            .register_event(TimestampedEvent(start, Event::PeriodStart))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::AreasCounted(vec![(10, Area(14))]),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(start, Event::Clouds(0)))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::Field(Field {
+                    ra: 290.0,
+                    dec: 55.0,
+                }),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                Timestamp {
+                    hour: 22,
+                    minute: 57,
+                },
+                Event::Meteor(Meteor {
+                    shower: Shower::Perseids,
+                    magnitude: 35,
+                }),
+            ))
+            .unwrap();
+
+        match builder.to_session() {
+            Err(BuilderError::NoEndTime) => {}
+            _ => panic!("to_session does not return NoEndTime"),
+        };
+    }
+
+    #[test]
+    fn test_builder_7() {
+        let mut builder = SessionBuilder::new();
+        let start = Timestamp {
+            hour: 22,
+            minute: 55,
+        };
+        let end = Timestamp {
+            hour: 1,
+            minute: 20,
+        };
+        builder
+            .register_event(TimestampedEvent(start, Event::PeriodStart))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::AreasCounted(vec![(10, Area(14))]),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(start, Event::Clouds(0)))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                Timestamp {
+                    hour: 22,
+                    minute: 57,
+                },
+                Event::Meteor(Meteor {
+                    shower: Shower::Perseids,
+                    magnitude: 35,
+                }),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(end, Event::PeriodEnd))
+            .unwrap();
+
+        match builder.to_session() {
+            Err(BuilderError::NoField) => {}
+            _ => panic!("to_session does not return NoField"),
+        };
+    }
 }

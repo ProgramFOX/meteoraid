@@ -1,5 +1,5 @@
 #[derive(Copy, Clone)]
 pub struct Field {
-    ra: f64,
-    dec: f64,
+    pub ra: f64,
+    pub dec: f64,
 }

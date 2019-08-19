@@ -1,7 +1,7 @@
 #[derive(Copy, Clone)]
 pub struct Meteor {
-    shower: Shower,
-    magnitude: i32,
+    pub shower: Shower,
+    pub magnitude: i32,
 }
 
 #[derive(Copy, Clone)]

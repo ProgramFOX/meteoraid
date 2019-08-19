@@ -171,7 +171,7 @@ pub const AREAS: [&[f64]; 30] = [
 ];
 
 #[derive(Copy, Clone, PartialEq)]
-pub struct Area(usize);
+pub struct Area(pub usize);
 
 pub fn get_limiting_magnitude(stars: usize, area: Area) -> Option<f64> {
     let Area(area_number) = area;
