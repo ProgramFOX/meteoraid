@@ -172,7 +172,7 @@ impl IncompletePeriod {
             Ok(Period {
                 start_time: *start_time,
                 end_time: *end_time,
-                teff: teff_minutes as f64 / 60f64,
+                teff: (teff_minutes as f64 / 60f64 * 100f64).round() / 100f64,
                 limiting_magnitude: lm_avg,
                 field: *field,
                 cloud_factor,
@@ -522,6 +522,7 @@ mod tests {
         assert_eq!(period.meteors.len(), 1);
         assert_eq!(period.cloud_factor, 1.0);
         assert_eq!(period.limiting_magnitude, 5.58);
+        assert_eq!(period.teff, 2.42);
     }
 
     #[test]
@@ -614,6 +615,7 @@ mod tests {
         assert_eq!(period.cloud_factor, 1.0);
         assert_eq!(period.limiting_magnitude, 5.58);
         assert_eq!(period.field.ra, 290.0);
+        assert_eq!(period.teff, 2.42);
 
         let period2 = &session.periods[1];
         assert_eq!(period2.start_time, start2);
@@ -622,6 +624,7 @@ mod tests {
         assert_eq!(period2.cloud_factor, 1.05);
         assert_eq!(period2.limiting_magnitude, 5.64);
         assert_eq!(period2.field.ra, 336.0);
+        assert_eq!(period2.teff, 0.5);
     }
 
     #[test]
