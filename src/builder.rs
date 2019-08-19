@@ -868,4 +868,137 @@ mod tests {
             _ => panic!("to_session does not return NoField"),
         };
     }
+
+    #[test]
+    fn test_builder_8() {
+        let mut builder = SessionBuilder::new();
+        let start = Timestamp {
+            hour: 22,
+            minute: 55,
+        };
+        let end = Timestamp {
+            hour: 1,
+            minute: 20,
+        };
+        builder
+            .register_event(TimestampedEvent(start, Event::PeriodStart))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::AreasCounted(vec![(10, Area(14))]),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(start, Event::Clouds(0)))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::Field(Field {
+                    ra: 290.0,
+                    dec: 55.0,
+                }),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                Timestamp {
+                    hour: 22,
+                    minute: 57,
+                },
+                Event::Meteor(Meteor {
+                    shower: Shower::Perseids,
+                    magnitude: 35,
+                }),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                Timestamp { hour: 0, minute: 1 },
+                Event::BreakStart,
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                Timestamp {
+                    hour: 0,
+                    minute: 31,
+                },
+                Event::BreakEnd,
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(end, Event::PeriodEnd))
+            .unwrap();
+
+        let session = builder.to_session().unwrap();
+        assert_eq!(session.periods.len(), 1);
+        let period = &session.periods[0];
+        assert_eq!(period.start_time, start);
+        assert_eq!(period.end_time, end);
+        assert_eq!(period.meteors.len(), 1);
+        assert_eq!(period.cloud_factor, 1.0);
+        assert_eq!(period.limiting_magnitude, 5.58);
+        assert_eq!(period.teff, 1.92);
+    }
+
+    #[test]
+    fn test_builder_9() {
+        let mut builder = SessionBuilder::new();
+        let start = Timestamp {
+            hour: 22,
+            minute: 55,
+        };
+        let end = Timestamp {
+            hour: 1,
+            minute: 20,
+        };
+        builder
+            .register_event(TimestampedEvent(start, Event::PeriodStart))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::AreasCounted(vec![(10, Area(14))]),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(start, Event::Clouds(0)))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::Field(Field {
+                    ra: 290.0,
+                    dec: 55.0,
+                }),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                Timestamp {
+                    hour: 22,
+                    minute: 57,
+                },
+                Event::Meteor(Meteor {
+                    shower: Shower::Perseids,
+                    magnitude: 35,
+                }),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                Timestamp { hour: 0, minute: 1 },
+                Event::BreakStart,
+            ))
+            .unwrap();
+        match builder.register_event(TimestampedEvent(
+            Timestamp { hour: 0, minute: 2 },
+            Event::Clouds(5),
+        )) {
+            Err(BuilderError::InBreak) => {}
+            _ => panic!("register_event didn't return InBreak"),
+        };
+    }
 }
