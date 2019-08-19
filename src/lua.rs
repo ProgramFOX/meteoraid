@@ -258,4 +258,10 @@ mod tests {
             ])
         );
     }
+
+    #[test]
+    fn test_lua_8() {
+        let l = new_lua().unwrap();
+        assert!(run_code("per(3.7)", &l).is_err());
+    }
 }
