@@ -13,6 +13,7 @@ pub enum Event {
     Field(Field),
     PeriodStart,
     PeriodEnd,
+    Showers(Vec<Shower>),
 }
 
 pub struct TimestampedEvent(pub Timestamp, pub Event);

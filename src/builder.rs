@@ -49,6 +49,15 @@ impl SessionBuilder {
                 self.current.end_time = Some(timestamp);
             }
             Event::Meteor(meteor) => {
+                if !self
+                    .current
+                    .showers
+                    .as_ref()
+                    .unwrap_or(&vec![])
+                    .contains(&meteor.shower)
+                {
+                    return Err(BuilderError::NotObservingShower);
+                }
                 self.current.meteors.push(meteor);
             }
             Event::Field(field) => match self.current.field {
@@ -87,6 +96,13 @@ impl SessionBuilder {
                     Err(BuilderError::NoBreakToEnd)?;
                 }
             },
+            Event::Showers(showers) => {
+                if self.current.showers.is_some() {
+                    return Err(BuilderError::AlreadyShowers);
+                }
+
+                self.current.showers = Some(showers);
+            }
         };
         Ok(())
     }
@@ -96,7 +112,7 @@ struct IncompletePeriod {
     start_time: Option<Timestamp>,
     end_time: Option<Timestamp>,
     field: Option<Field>,
-    showers: Vec<Shower>,
+    showers: Option<Vec<Shower>>,
     meteors: Vec<Meteor>,
     limiting_magnitudes: Vec<(f64, Timestamp)>,
     clouds: Vec<(u8, Timestamp)>,
@@ -110,7 +126,7 @@ impl IncompletePeriod {
             start_time: None,
             end_time: None,
             field: None,
-            showers: vec![],
+            showers: None,
             meteors: vec![],
             limiting_magnitudes: vec![],
             clouds: vec![],
@@ -177,7 +193,7 @@ impl IncompletePeriod {
                 limiting_magnitude: lm_avg,
                 field: *field,
                 cloud_factor,
-                showers: self.showers,
+                showers: self.showers.unwrap_or(vec![]),
                 meteors: self.meteors,
             })
         } else {
@@ -231,6 +247,7 @@ pub enum BuilderError {
     NoField,
     NoF,
     AlreadyField,
+    AlreadyShowers,
     InvalidLm,
     InBreak,
     NoBreakToEnd,
@@ -238,6 +255,7 @@ pub enum BuilderError {
     InvalidBreaks,
     LmInsufficientTeff,
     FInsufficientTeff,
+    NotObservingShower,
     Unknown,
 }
 
@@ -255,6 +273,7 @@ impl std::fmt::Display for BuilderError {
                 BuilderError::NoField => "No field given for this period.",
                 BuilderError::NoF => "No cloud information given for this period.",
                 BuilderError::AlreadyField => "You already specified a field for this period.",
+                BuilderError::AlreadyShowers => "You already specified showers for this period.",
                 BuilderError::InvalidLm => "Invalid data for calculating limiting magnitude.",
                 BuilderError::InBreak => "You can't register events during a break.",
                 BuilderError::NoBreakToEnd => "There is no ongoing break to end.",
@@ -265,6 +284,9 @@ impl std::fmt::Display for BuilderError {
                 }
                 BuilderError::FInsufficientTeff => {
                     "Your recorded cloud estimates do not span your whole period."
+                }
+                BuilderError::NotObservingShower => {
+                    "Meteor belongs to a shower that you are not observing."
                 }
                 BuilderError::Unknown => "unexpected error",
             }
@@ -484,6 +506,12 @@ mod tests {
         builder
             .register_event(TimestampedEvent(
                 start,
+                Event::Showers(vec![Shower::Perseids]),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
                 Event::AreasCounted(vec![(10, Area(14))]),
             ))
             .unwrap();
@@ -539,6 +567,12 @@ mod tests {
         };
         builder
             .register_event(TimestampedEvent(start, Event::PeriodStart))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::Showers(vec![Shower::Perseids]),
+            ))
             .unwrap();
         builder
             .register_event(TimestampedEvent(
@@ -643,6 +677,12 @@ mod tests {
             .register_event(TimestampedEvent(start, Event::PeriodStart))
             .unwrap();
         builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::Showers(vec![Shower::Perseids]),
+            ))
+            .unwrap();
+        builder
             .register_event(TimestampedEvent(start, Event::Clouds(0)))
             .unwrap();
         builder
@@ -689,6 +729,12 @@ mod tests {
         };
         builder
             .register_event(TimestampedEvent(start, Event::PeriodStart))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::Showers(vec![Shower::Perseids]),
+            ))
             .unwrap();
         builder
             .register_event(TimestampedEvent(
@@ -741,6 +787,12 @@ mod tests {
         builder
             .register_event(TimestampedEvent(
                 start,
+                Event::Showers(vec![Shower::Perseids]),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
                 Event::AreasCounted(vec![(10, Area(14))]),
             ))
             .unwrap();
@@ -787,6 +839,12 @@ mod tests {
         };
         builder
             .register_event(TimestampedEvent(start, Event::PeriodStart))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::Showers(vec![Shower::Perseids]),
+            ))
             .unwrap();
         builder
             .register_event(TimestampedEvent(
@@ -842,6 +900,12 @@ mod tests {
         builder
             .register_event(TimestampedEvent(
                 start,
+                Event::Showers(vec![Shower::Perseids]),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
                 Event::AreasCounted(vec![(10, Area(14))]),
             ))
             .unwrap();
@@ -883,6 +947,12 @@ mod tests {
         };
         builder
             .register_event(TimestampedEvent(start, Event::PeriodStart))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::Showers(vec![Shower::Perseids]),
+            ))
             .unwrap();
         builder
             .register_event(TimestampedEvent(
@@ -961,6 +1031,12 @@ mod tests {
         builder
             .register_event(TimestampedEvent(
                 start,
+                Event::Showers(vec![Shower::Perseids]),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
                 Event::AreasCounted(vec![(10, Area(14))]),
             ))
             .unwrap();
@@ -1016,6 +1092,12 @@ mod tests {
         };
         builder
             .register_event(TimestampedEvent(start, Event::PeriodStart))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::Showers(vec![Shower::Perseids]),
+            ))
             .unwrap();
         builder
             .register_event(TimestampedEvent(
@@ -1087,6 +1169,12 @@ mod tests {
         };
         builder
             .register_event(TimestampedEvent(start, Event::PeriodStart))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::Showers(vec![Shower::Perseids]),
+            ))
             .unwrap();
         builder
             .register_event(TimestampedEvent(
@@ -1170,12 +1258,14 @@ mod tests {
             hour: 22,
             minute: 55,
         };
-        let end = Timestamp {
-            hour: 1,
-            minute: 20,
-        };
         builder
             .register_event(TimestampedEvent(start, Event::PeriodStart))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::Showers(vec![Shower::Perseids]),
+            ))
             .unwrap();
         builder
             .register_event(TimestampedEvent(
@@ -1216,6 +1306,125 @@ mod tests {
         )) {
             Err(BuilderError::AlreadyField) => {}
             _ => panic!("register_event does not return AlreadyField"),
+        };
+    }
+
+    #[test]
+    fn test_builder_13() {
+        let mut builder = SessionBuilder::new();
+        let start = Timestamp {
+            hour: 22,
+            minute: 55,
+        };
+        builder
+            .register_event(TimestampedEvent(start, Event::PeriodStart))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::Showers(vec![Shower::Perseids]),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::AreasCounted(vec![(10, Area(14))]),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(start, Event::Clouds(0)))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::Field(Field {
+                    ra: 290.0,
+                    dec: 55.0,
+                }),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                Timestamp {
+                    hour: 22,
+                    minute: 57,
+                },
+                Event::Meteor(Meteor {
+                    shower: Shower::Perseids,
+                    magnitude: 35,
+                }),
+            ))
+            .unwrap();
+        match builder.register_event(TimestampedEvent(
+            Timestamp {
+                hour: 22,
+                minute: 57,
+            },
+            Event::Showers(vec![Shower::Leonids]),
+        )) {
+            Err(BuilderError::AlreadyShowers) => {}
+            _ => panic!("register_event does not return AlreadyShowers"),
+        };
+    }
+
+    #[test]
+    fn test_builder_14() {
+        let mut builder = SessionBuilder::new();
+        let start = Timestamp {
+            hour: 22,
+            minute: 55,
+        };
+        builder
+            .register_event(TimestampedEvent(start, Event::PeriodStart))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::Showers(vec![Shower::Perseids]),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::AreasCounted(vec![(10, Area(14))]),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(start, Event::Clouds(0)))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::Field(Field {
+                    ra: 290.0,
+                    dec: 55.0,
+                }),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                Timestamp {
+                    hour: 22,
+                    minute: 57,
+                },
+                Event::Meteor(Meteor {
+                    shower: Shower::Perseids,
+                    magnitude: 35,
+                }),
+            ))
+            .unwrap();
+        match builder.register_event(TimestampedEvent(
+            Timestamp {
+                hour: 22,
+                minute: 57,
+            },
+            Event::Meteor(Meteor {
+                shower: Shower::KappaCygnids,
+                magnitude: 20,
+            }),
+        )) {
+            Err(BuilderError::NotObservingShower) => {}
+            _ => panic!("register_event does not return NotObservingShower"),
         };
     }
 }
