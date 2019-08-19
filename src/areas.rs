@@ -181,11 +181,12 @@ pub fn get_limiting_magnitude(stars: usize, area: Area) -> Option<f64> {
 }
 
 pub fn get_limiting_magnitude_avg(counts: Vec<(usize, Area)>) -> Option<f64> {
-    let lms: Vec<f64> = counts
+    let mut lms: Vec<f64> = counts
         .iter()
         .map(|count| get_limiting_magnitude(count.0, count.1))
         .flatten()
         .collect();
+    lms.sort_by(|a, b| a.partial_cmp(b).unwrap());
 
     if lms.len() == 0 || lms.len() != counts.len() {
         return None;
@@ -302,6 +303,14 @@ mod tests {
         assert_eq!(
             get_limiting_magnitude_avg(vec![(110, Area(14)), (10, Area(70)), (153, Area(2))]),
             None
+        );
+    }
+
+    #[test]
+    pub fn test_limiting_magnitude_average_8() {
+        assert_eq!(
+            get_limiting_magnitude_avg(vec![(12, Area(14)), (12, Area(7)), (10, Area(6))]),
+            Some(5.91),
         );
     }
 }
