@@ -105,7 +105,7 @@ mod tests {
         interpreter
             .execute_multiple_lines(
                 "2237
-                 period_start
+                 period_start -- and a comment
                  clouds(0)
                  showers(PER, ANT, KCG, SPO)
                  areas(area14(11))
@@ -221,5 +221,23 @@ mod tests {
 
         let period2 = &session.periods[1];
         assert_eq!(period2.teff, 0.25);
+    }
+
+    #[test]
+    fn test_interpreter_6() {
+        let mut interpreter = Interpreter::new().unwrap();
+        interpreter
+            .execute_multiple_lines(
+                "2237
+                 period_start
+                 clouds(0)
+                 showers(PER, ANT, KCG, SPO) << 2238
+                 areas(area14(11))
+                 fieldC(336, 52.3)
+                 2337
+                 period_end",
+            )
+            .unwrap();
+        assert!(interpreter.get_session().is_err());
     }
 }

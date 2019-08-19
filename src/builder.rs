@@ -1427,4 +1427,133 @@ mod tests {
             _ => panic!("register_event does not return NotObservingShower"),
         };
     }
+
+    #[test]
+    fn test_builder_15() {
+        let mut builder = SessionBuilder::new();
+        let start = Timestamp {
+            hour: 22,
+            minute: 55,
+        };
+        let end = Timestamp {
+            hour: 1,
+            minute: 20,
+        };
+        builder
+            .register_event(TimestampedEvent(start, Event::PeriodStart))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::Showers(vec![Shower::Perseids]),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(start, Event::Clouds(0)))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::Field(Field {
+                    ra: 290.0,
+                    dec: 55.0,
+                }),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                Timestamp {
+                    hour: 22,
+                    minute: 57,
+                },
+                Event::Meteor(Meteor {
+                    shower: Shower::Perseids,
+                    magnitude: 35,
+                }),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                Timestamp {
+                    hour: 22,
+                    minute: 57,
+                },
+                Event::AreasCounted(vec![(10, Area(14))]),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(end, Event::PeriodEnd))
+            .unwrap();
+
+        match builder.to_session() {
+            Err(BuilderError::LmInsufficientTeff) => {}
+            _ => panic!("to_session does not return LmInsufficientTeff"),
+        }
+    }
+
+    #[test]
+    fn test_builder_16() {
+        let mut builder = SessionBuilder::new();
+        let start = Timestamp {
+            hour: 22,
+            minute: 55,
+        };
+        let end = Timestamp {
+            hour: 1,
+            minute: 20,
+        };
+        builder
+            .register_event(TimestampedEvent(start, Event::PeriodStart))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::AreasCounted(vec![(10, Area(14))]),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::Showers(vec![Shower::Perseids]),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::Field(Field {
+                    ra: 290.0,
+                    dec: 55.0,
+                }),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                Timestamp {
+                    hour: 22,
+                    minute: 57,
+                },
+                Event::Meteor(Meteor {
+                    shower: Shower::Perseids,
+                    magnitude: 35,
+                }),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                Timestamp {
+                    hour: 22,
+                    minute: 57,
+                },
+                Event::Clouds(0),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(end, Event::PeriodEnd))
+            .unwrap();
+
+        match builder.to_session() {
+            Err(BuilderError::FInsufficientTeff) => {}
+            _ => panic!("to_session does not return FInsufficientTeff"),
+        }
+    }
 }
