@@ -63,6 +63,7 @@ impl SessionBuilder {
                 let maybe_lm_avg = get_limiting_magnitude_avg(counts);
                 match maybe_lm_avg {
                     Some(lm_avg) => {
+                        println!("{}", lm_avg);
                         self.current.limiting_magnitudes.push((lm_avg, timestamp));
                     }
                     None => Err(BuilderError::InvalidLm)?,
@@ -1000,5 +1001,161 @@ mod tests {
             Err(BuilderError::InBreak) => {}
             _ => panic!("register_event didn't return InBreak"),
         };
+    }
+
+    #[test]
+    fn test_builder_10() {
+        let mut builder = SessionBuilder::new();
+        let start = Timestamp {
+            hour: 22,
+            minute: 55,
+        };
+        let end = Timestamp {
+            hour: 1,
+            minute: 20,
+        };
+        builder
+            .register_event(TimestampedEvent(start, Event::PeriodStart))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::AreasCounted(vec![(10, Area(14)), (10, Area(7)), (8, Area(6))]),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(start, Event::Clouds(0)))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::Field(Field {
+                    ra: 290.0,
+                    dec: 55.0,
+                }),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                Timestamp {
+                    hour: 22,
+                    minute: 57,
+                },
+                Event::Meteor(Meteor {
+                    shower: Shower::Perseids,
+                    magnitude: 35,
+                }),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                Timestamp { hour: 0, minute: 0 },
+                Event::AreasCounted(vec![(12, Area(14)), (12, Area(7)), (10, Area(6))]),
+            ))
+            .unwrap();
+        builder.register_event(TimestampedEvent(
+            Timestamp { hour: 0, minute: 0 },
+            Event::Clouds(15),
+        )).unwrap();
+        builder
+            .register_event(TimestampedEvent(end, Event::PeriodEnd))
+            .unwrap();
+
+        let session = builder.to_session().unwrap();
+        assert_eq!(session.periods.len(), 1);
+        let period = &session.periods[0];
+        assert_eq!(period.start_time, start);
+        assert_eq!(period.end_time, end);
+        assert_eq!(period.meteors.len(), 1);
+        assert_eq!(period.cloud_factor, 1.09);
+        assert_eq!(period.limiting_magnitude, 5.76);
+        assert_eq!(period.teff, 2.42);
+    }
+
+    #[test]
+    fn test_builder_11() {
+        let mut builder = SessionBuilder::new();
+        let start = Timestamp {
+            hour: 22,
+            minute: 55,
+        };
+        let end = Timestamp {
+            hour: 1,
+            minute: 20,
+        };
+        builder
+            .register_event(TimestampedEvent(start, Event::PeriodStart))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::AreasCounted(vec![(10, Area(14)), (10, Area(7)), (8, Area(6))]),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(start, Event::Clouds(0)))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::Field(Field {
+                    ra: 290.0,
+                    dec: 55.0,
+                }),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                Timestamp {
+                    hour: 22,
+                    minute: 57,
+                },
+                Event::Meteor(Meteor {
+                    shower: Shower::Perseids,
+                    magnitude: 35,
+                }),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                Timestamp {
+                    hour: 23,
+                    minute: 15,
+                },
+                Event::BreakStart,
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                Timestamp {
+                    hour: 23,
+                    minute: 55,
+                },
+                Event::BreakEnd,
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                Timestamp { hour: 0, minute: 0 },
+                Event::AreasCounted(vec![(12, Area(14)), (12, Area(7)), (10, Area(6))]),
+            ))
+            .unwrap();
+        builder.register_event(TimestampedEvent(
+            Timestamp { hour: 0, minute: 0 },
+            Event::Clouds(15),
+        )).unwrap();
+        builder
+            .register_event(TimestampedEvent(end, Event::PeriodEnd))
+            .unwrap();
+
+        let session = builder.to_session().unwrap();
+        assert_eq!(session.periods.len(), 1);
+        let period = &session.periods[0];
+        assert_eq!(period.start_time, start);
+        assert_eq!(period.end_time, end);
+        assert_eq!(period.meteors.len(), 1);
+        assert_eq!(period.cloud_factor, 1.13);
+        assert_eq!(period.limiting_magnitude, 5.83);
+        assert_eq!(period.teff, 1.75);
     }
 }
