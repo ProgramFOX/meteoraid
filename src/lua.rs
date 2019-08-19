@@ -152,7 +152,7 @@ pub fn new_lua() -> Result<Lua, rlua::Error> {
                 ))
             },
         )?;
-        globals.set("showers", showers_fn);
+        globals.set("showers", showers_fn)?;
 
         Ok(())
     })?;
