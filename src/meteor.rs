@@ -4,7 +4,7 @@ pub struct Meteor {
     pub magnitude: i32,
 }
 
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash)]
 pub enum Shower {
     Quadrantids,
     Lyrids,
