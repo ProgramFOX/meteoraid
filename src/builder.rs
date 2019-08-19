@@ -1053,10 +1053,12 @@ mod tests {
                 Event::AreasCounted(vec![(12, Area(14)), (12, Area(7)), (10, Area(6))]),
             ))
             .unwrap();
-        builder.register_event(TimestampedEvent(
-            Timestamp { hour: 0, minute: 0 },
-            Event::Clouds(15),
-        )).unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                Timestamp { hour: 0, minute: 0 },
+                Event::Clouds(15),
+            ))
+            .unwrap();
         builder
             .register_event(TimestampedEvent(end, Event::PeriodEnd))
             .unwrap();
@@ -1140,10 +1142,12 @@ mod tests {
                 Event::AreasCounted(vec![(12, Area(14)), (12, Area(7)), (10, Area(6))]),
             ))
             .unwrap();
-        builder.register_event(TimestampedEvent(
-            Timestamp { hour: 0, minute: 0 },
-            Event::Clouds(15),
-        )).unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                Timestamp { hour: 0, minute: 0 },
+                Event::Clouds(15),
+            ))
+            .unwrap();
         builder
             .register_event(TimestampedEvent(end, Event::PeriodEnd))
             .unwrap();
@@ -1157,5 +1161,61 @@ mod tests {
         assert_eq!(period.cloud_factor, 1.13);
         assert_eq!(period.limiting_magnitude, 5.83);
         assert_eq!(period.teff, 1.75);
+    }
+
+    #[test]
+    fn test_builder_12() {
+        let mut builder = SessionBuilder::new();
+        let start = Timestamp {
+            hour: 22,
+            minute: 55,
+        };
+        let end = Timestamp {
+            hour: 1,
+            minute: 20,
+        };
+        builder
+            .register_event(TimestampedEvent(start, Event::PeriodStart))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::AreasCounted(vec![(10, Area(14))]),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(start, Event::Clouds(0)))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::Field(Field {
+                    ra: 290.0,
+                    dec: 55.0,
+                }),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                Timestamp {
+                    hour: 22,
+                    minute: 57,
+                },
+                Event::Meteor(Meteor {
+                    shower: Shower::Perseids,
+                    magnitude: 35,
+                }),
+            ))
+            .unwrap();
+        match builder.register_event(TimestampedEvent(
+            Timestamp {
+                hour: 22,
+                minute: 57,
+            },
+            Event::Field(Field { ra: 0.0, dec: 0.0 }),
+        )) {
+            Err(BuilderError::AlreadyField) => {}
+            _ => panic!("register_event does not return AlreadyField"),
+        };
     }
 }
