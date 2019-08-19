@@ -1,10 +1,10 @@
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub struct Meteor {
     pub shower: Shower,
     pub magnitude: i32,
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
 pub enum Shower {
     Quadrantids,
     Lyrids,

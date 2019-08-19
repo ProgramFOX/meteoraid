@@ -170,7 +170,7 @@ pub const AREAS: [&[f64]; 30] = [
     ],
 ];
 
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub struct Area(pub usize);
 
 pub fn get_limiting_magnitude(stars: usize, area: Area) -> Option<f64> {

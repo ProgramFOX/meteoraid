@@ -5,6 +5,7 @@ use crate::meteor::{Meteor, Shower};
 use crate::timestamp::Timestamp;
 use std::collections::HashMap;
 
+#[derive(Clone, PartialEq, Debug)]
 pub enum Event {
     Clouds(u8),
     AreasCounted(Vec<(usize, Area)>),
