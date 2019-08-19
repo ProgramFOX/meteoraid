@@ -30,6 +30,8 @@ pub enum Shower {
     DecemberLeoMinorids,
     ComaBerenicids,
     Ursids,
+    Antihelion,
+    Sporadic,
 }
 
 use Shower::*;
@@ -60,6 +62,8 @@ impl Shower {
             "DLM" => Some(DecemberLeoMinorids),
             "COM" => Some(ComaBerenicids),
             "URS" => Some(Ursids),
+            "ANT" => Some(Antihelion),
+            "SPO" => Some(Sporadic),
             _ => None,
         }
     }
@@ -90,6 +94,8 @@ impl Shower {
             DecemberLeoMinorids => "DLM",
             ComaBerenicids => "COM",
             Ursids => "URS",
+            Antihelion => "ANT",
+            Sporadic => "SPO",
         }
     }
 }
