@@ -1,3 +1,5 @@
+#![feature(try_trait)]
+
 mod areas;
 mod builder;
 mod distribution;

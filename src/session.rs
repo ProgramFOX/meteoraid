@@ -4,6 +4,7 @@ use crate::field::Field;
 use crate::meteor::{Meteor, Shower};
 use crate::timestamp::Timestamp;
 use std::collections::HashMap;
+use std::option::NoneError;
 
 #[derive(Clone, PartialEq, Debug)]
 pub enum Event {
@@ -51,6 +52,36 @@ impl Period {
             cd.1.add_meteor(&meteor);
         }
         map
+    }
+
+    pub fn get_distribution_csv(&self) -> Result<String, NoneError> {
+        let mut lines: Vec<String> = vec![];
+        let count_and_dist = self.get_count_and_distribution();
+        for shower in &self.showers {
+            let shower_dist = count_and_dist.get(&shower)?.1.to_map();
+            lines.push(format!(
+                "{};{};{};{};{};{};{};{};{};{};{};{};{};{};{};{};{};{}",
+                self.date,
+                self.start_time.to_shorthand_int_notation(),
+                self.end_time.to_shorthand_int_notation(),
+                shower.to_imo_code(),
+                *shower_dist.get(&-6)? as f64 / 10.0,
+                *shower_dist.get(&-5)? as f64 / 10.0,
+                *shower_dist.get(&-4)? as f64 / 10.0,
+                *shower_dist.get(&-3)? as f64 / 10.0,
+                *shower_dist.get(&-2)? as f64 / 10.0,
+                *shower_dist.get(&-1)? as f64 / 10.0,
+                *shower_dist.get(&0)? as f64 / 10.0,
+                *shower_dist.get(&1)? as f64 / 10.0,
+                *shower_dist.get(&2)? as f64 / 10.0,
+                *shower_dist.get(&3)? as f64 / 10.0,
+                *shower_dist.get(&4)? as f64 / 10.0,
+                *shower_dist.get(&5)? as f64 / 10.0,
+                *shower_dist.get(&6)? as f64 / 10.0,
+                *shower_dist.get(&7)? as f64 / 10.0,
+            ));
+        }
+        Ok(lines.join("\n"))
     }
 }
 
@@ -130,5 +161,68 @@ mod tests {
         assert_eq!(*sporadic_distr_map.get(&4).unwrap(), 10);
         assert_eq!(*sporadic_distr_map.get(&5).unwrap(), 10);
         assert_eq!(*sporadic_distr_map.get(&1).unwrap(), 0);
+    }
+
+    #[test]
+    fn test_period_distribution_csv_1() {
+        let period = Period {
+            start_time: Timestamp { hour: 0, minute: 0 },
+            end_time: Timestamp {
+                hour: 0,
+                minute: 30,
+            },
+            date: "12 Aug 2019".to_owned(),
+            teff: 0.0,
+            limiting_magnitude: 0.0,
+            field: Field { ra: 0.0, dec: 0.0 },
+            cloud_factor: 1.0,
+            showers: vec![Shower::Perseids, Shower::Sporadic],
+            meteors: vec![
+                Meteor {
+                    shower: Shower::Perseids,
+                    magnitude: 30,
+                },
+                Meteor {
+                    shower: Shower::Perseids,
+                    magnitude: 20,
+                },
+                Meteor {
+                    shower: Shower::Perseids,
+                    magnitude: -5,
+                },
+                Meteor {
+                    shower: Shower::Sporadic,
+                    magnitude: 40,
+                },
+                Meteor {
+                    shower: Shower::Sporadic,
+                    magnitude: -25,
+                },
+                Meteor {
+                    shower: Shower::Perseids,
+                    magnitude: 30,
+                },
+                Meteor {
+                    shower: Shower::Perseids,
+                    magnitude: 30,
+                },
+                Meteor {
+                    shower: Shower::Sporadic,
+                    magnitude: 50,
+                },
+                Meteor {
+                    shower: Shower::Perseids,
+                    magnitude: 30,
+                },
+                Meteor {
+                    shower: Shower::Perseids,
+                    magnitude: 30,
+                },
+            ],
+        };
+        assert_eq!(
+            period.get_distribution_csv().unwrap(),
+            "12 Aug 2019;0;30;PER;0;0;0;0;0;0.5;0.5;0;1;5;0;0;0;0\n12 Aug 2019;0;30;SPO;0;0;0;0.5;0.5;0;0;0;0;0;1;1;0;0".to_string()
+        );
     }
 }
