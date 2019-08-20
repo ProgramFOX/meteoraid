@@ -44,6 +44,7 @@ impl Distribution {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::meteor::Shower;
 
     #[test]
     fn test_distr_1() {
