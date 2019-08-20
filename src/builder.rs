@@ -81,9 +81,6 @@ impl SessionBuilder {
             Event::Clouds(clouds) => {
                 self.current.clouds.push((clouds, timestamp));
             }
-            Event::Meteor(meteor) => {
-                self.current.meteors.push(meteor);
-            }
             Event::BreakStart => {
                 self.current.current_break = Some(timestamp);
             }
