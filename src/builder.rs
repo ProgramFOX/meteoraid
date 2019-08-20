@@ -189,7 +189,7 @@ impl IncompletePeriod {
             Ok(Period {
                 start_time: *start_time,
                 end_time: *end_time,
-                teff: (teff_minutes as f64 / 60f64 * 100f64).round() / 100f64,
+                teff: teff_minutes as f64 / 60f64,
                 limiting_magnitude: lm_avg,
                 field: *field,
                 cloud_factor,
@@ -489,6 +489,10 @@ mod tests {
 
     use crate::areas::Area;
 
+    fn round(a: f64) -> f64 {
+        (a * 100f64).round() / 100f64
+    }
+
     #[test]
     fn test_builder_1() {
         let mut builder = SessionBuilder::new();
@@ -551,7 +555,7 @@ mod tests {
         assert_eq!(period.meteors.len(), 1);
         assert_eq!(period.cloud_factor, 1.0);
         assert_eq!(period.limiting_magnitude, 5.58);
-        assert_eq!(period.teff, 2.42);
+        assert_eq!(round(period.teff), 2.42);
     }
 
     #[test]
@@ -650,7 +654,7 @@ mod tests {
         assert_eq!(period.cloud_factor, 1.0);
         assert_eq!(period.limiting_magnitude, 5.58);
         assert_eq!(period.field.ra, 290.0);
-        assert_eq!(period.teff, 2.42);
+        assert_eq!(round(period.teff), 2.42);
 
         let period2 = &session.periods[1];
         assert_eq!(period2.start_time, start2);
@@ -1011,7 +1015,7 @@ mod tests {
         assert_eq!(period.meteors.len(), 1);
         assert_eq!(period.cloud_factor, 1.0);
         assert_eq!(period.limiting_magnitude, 5.58);
-        assert_eq!(period.teff, 1.92);
+        assert_eq!(round(period.teff), 1.92);
     }
 
     #[test]
@@ -1153,7 +1157,7 @@ mod tests {
         assert_eq!(period.meteors.len(), 1);
         assert_eq!(period.cloud_factor, 1.09);
         assert_eq!(period.limiting_magnitude, 5.76);
-        assert_eq!(period.teff, 2.42);
+        assert_eq!(round(period.teff), 2.42);
     }
 
     #[test]
