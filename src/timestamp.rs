@@ -26,6 +26,10 @@ impl Timestamp {
         let b_total_min = b_hour * 60 + b.minute;
         a_total_min <= self_total_min && self_total_min <= b_total_min
     }
+
+    pub fn to_shorthand_int_notation(&self) -> u32 {
+        self.hour * 100 + self.minute
+    }
 }
 
 pub fn effective_time_minutes(
@@ -82,6 +86,30 @@ mod tests {
         assert_eq!(
             Timestamp::from_shorthand_int_notation(0107),
             Timestamp { hour: 1, minute: 7 }
+        );
+    }
+
+    #[test]
+    pub fn test_to_shorthand_notation_1() {
+        assert_eq!(
+            Timestamp {
+                hour: 22,
+                minute: 51
+            }
+            .to_shorthand_int_notation(),
+            2251
+        );
+    }
+
+    #[test]
+    pub fn test_to_shorthand_notation_2() {
+        assert_eq!(
+            Timestamp {
+                hour: 0,
+                minute: 15
+            }
+            .to_shorthand_int_notation(),
+            15
         );
     }
 
