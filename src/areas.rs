@@ -181,7 +181,7 @@ pub fn get_limiting_magnitude(stars: usize, area: Area) -> Option<f64> {
         .and_then(|a| a.get(stars - 1).copied())
 }
 
-pub fn get_limiting_magnitude_avg(counts: Vec<(usize, Area)>) -> Option<f64> {
+pub fn get_limiting_magnitude_avg(counts: &[(usize, Area)]) -> Option<f64> {
     let mut lms: Vec<f64> = counts
         .iter()
         .map(|count| get_limiting_magnitude(count.0, count.1))
@@ -246,13 +246,13 @@ mod tests {
 
     #[test]
     pub fn test_limiting_magnitude_average_1() {
-        assert_eq!(get_limiting_magnitude_avg(vec![(11, Area(14))]), Some(5.64));
+        assert_eq!(get_limiting_magnitude_avg(&[(11, Area(14))]), Some(5.64));
     }
 
     #[test]
     pub fn test_limiting_magnitude_average_2() {
         assert_eq!(
-            get_limiting_magnitude_avg(vec![(11, Area(14)), (10, Area(7)), (8, Area(2))]),
+            get_limiting_magnitude_avg(&[(11, Area(14)), (10, Area(7)), (8, Area(2))]),
             Some(5.53)
         );
     }
@@ -260,7 +260,7 @@ mod tests {
     #[test]
     pub fn test_limiting_magnitude_average_3() {
         assert_eq!(
-            get_limiting_magnitude_avg(vec![(11, Area(14)), (10, Area(7)), (15, Area(2))]),
+            get_limiting_magnitude_avg(&[(11, Area(14)), (10, Area(7)), (15, Area(2))]),
             Some(5.50)
         );
     }
@@ -268,7 +268,7 @@ mod tests {
     #[test]
     pub fn test_limiting_magnitude_average_4() {
         assert_eq!(
-            get_limiting_magnitude_avg(vec![(1, Area(14)), (10, Area(7)), (15, Area(2))]),
+            get_limiting_magnitude_avg(&[(1, Area(14)), (10, Area(7)), (15, Area(2))]),
             Some(4.67)
         );
     }
@@ -276,7 +276,7 @@ mod tests {
     #[test]
     pub fn test_limiting_magnitude_average_5() {
         assert_eq!(
-            get_limiting_magnitude_avg(vec![
+            get_limiting_magnitude_avg(&vec![
                 (1, Area(14)),
                 (10, Area(7)),
                 (15, Area(2)),
@@ -289,7 +289,7 @@ mod tests {
     #[test]
     pub fn test_limiting_magnitude_average_6() {
         assert_eq!(
-            get_limiting_magnitude_avg(vec![
+            get_limiting_magnitude_avg(&[
                 (11, Area(14)),
                 (10, Area(7)),
                 (15, Area(2)),
@@ -302,7 +302,7 @@ mod tests {
     #[test]
     pub fn test_limiting_magnitude_average_7() {
         assert_eq!(
-            get_limiting_magnitude_avg(vec![(110, Area(14)), (10, Area(70)), (153, Area(2))]),
+            get_limiting_magnitude_avg(&[(110, Area(14)), (10, Area(70)), (153, Area(2))]),
             None
         );
     }
@@ -310,7 +310,7 @@ mod tests {
     #[test]
     pub fn test_limiting_magnitude_average_8() {
         assert_eq!(
-            get_limiting_magnitude_avg(vec![(12, Area(14)), (12, Area(7)), (10, Area(6))]),
+            get_limiting_magnitude_avg(&[(12, Area(14)), (12, Area(7)), (10, Area(6))]),
             Some(5.91),
         );
     }

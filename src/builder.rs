@@ -74,7 +74,7 @@ impl SessionBuilder {
                 }
             },
             Event::AreasCounted(counts) => {
-                let maybe_lm_avg = get_limiting_magnitude_avg(counts);
+                let maybe_lm_avg = get_limiting_magnitude_avg(&counts);
                 match maybe_lm_avg {
                     Some(lm_avg) => {
                         self.current.limiting_magnitudes.push((lm_avg, timestamp));
