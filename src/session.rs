@@ -57,7 +57,10 @@ impl Period {
     pub fn get_distribution_csv(&self) -> Result<String, NoneError> {
         let mut lines: Vec<String> = vec![];
         let count_and_dist = self.get_count_and_distribution();
-        for shower in &self.showers {
+        let mut showers_sorted = self.showers.clone();
+        showers_sorted.sort_by(|a, b| a.to_imo_code().cmp(b.to_imo_code()));
+
+        for shower in showers_sorted {
             let shower_dist = count_and_dist.get(&shower)?.1.to_map();
             lines.push(format!(
                 "{};{};{};{};{};{};{};{};{};{};{};{};{};{};{};{};{};{}",
@@ -94,6 +97,51 @@ impl Session {
             }
         }
         result
+    }
+
+    pub fn get_csvs(&self) -> Result<(String, String), NoneError> {
+        let mut showers: Vec<Shower> = self.all_showers().into_iter().collect();
+        showers.sort_by(|a, b| a.to_imo_code().cmp(b.to_imo_code()));
+
+        let mut count_csv_parts: Vec<String> = vec![];
+        count_csv_parts.push(format!(
+            "DATE UT;START;END;Teff;RA;Dec;F;Lm;{}",
+            &showers
+                .iter()
+                .map(|s| s.to_imo_code())
+                .collect::<Vec<&str>>()
+                .join(";;")
+        ));
+
+        let mut distr_csv_parts: Vec<String> = vec![];
+        distr_csv_parts
+            .push("DATE UT;START;END;SHOWER;-6;-5;-4;-3;-2;-1;0;1;2;3;4;5;6;7".to_owned());
+        for period in &self.periods {
+            let count_and_dist = period.get_count_and_distribution();
+            distr_csv_parts.push(period.get_distribution_csv()?);
+
+            let mut count_parts: Vec<String> = vec![];
+            for shower in &showers {
+                match count_and_dist.get(&shower) {
+                    Some((count, _)) => count_parts.push(format!("C;{}", count)),
+                    _ => count_parts.push("-;".to_owned()),
+                };
+            }
+            count_csv_parts.push(format!(
+                "{};{};{};{};{};{};{};{};{}",
+                period.date,
+                period.start_time.to_shorthand_int_notation(),
+                period.end_time.to_shorthand_int_notation(),
+                period.teff,
+                period.field.ra,
+                period.field.dec,
+                period.cloud_factor,
+                period.limiting_magnitude,
+                count_parts.join(";")
+            ));
+        }
+
+        Ok((count_csv_parts.join("\n"), distr_csv_parts.join("\n")))
     }
 }
 
@@ -274,5 +322,122 @@ mod tests {
         expected.insert(Shower::KappaCygnids);
         expected.insert(Shower::Sporadic);
         assert_eq!(session.all_showers(), expected);
+    }
+
+    #[test]
+    fn test_session_to_csv() {
+        let period1 = Period {
+            start_time: Timestamp {
+                hour: 23,
+                minute: 30,
+            },
+            end_time: Timestamp {
+                hour: 0,
+                minute: 30,
+            },
+            date: "12 Aug 2019".to_owned(),
+            teff: 1.0,
+            limiting_magnitude: 5.52,
+            field: Field {
+                ra: 336.0,
+                dec: 52.3,
+            },
+            cloud_factor: 1.05,
+            showers: vec![Shower::Perseids, Shower::Sporadic, Shower::KappaCygnids],
+            meteors: vec![
+                Meteor {
+                    shower: Shower::Perseids,
+                    magnitude: 30,
+                },
+                Meteor {
+                    shower: Shower::Perseids,
+                    magnitude: 20,
+                },
+                Meteor {
+                    shower: Shower::Perseids,
+                    magnitude: -5,
+                },
+                Meteor {
+                    shower: Shower::Sporadic,
+                    magnitude: 40,
+                },
+                Meteor {
+                    shower: Shower::Sporadic,
+                    magnitude: -25,
+                },
+                Meteor {
+                    shower: Shower::Perseids,
+                    magnitude: 30,
+                },
+                Meteor {
+                    shower: Shower::Perseids,
+                    magnitude: 30,
+                },
+                Meteor {
+                    shower: Shower::Sporadic,
+                    magnitude: 50,
+                },
+                Meteor {
+                    shower: Shower::Perseids,
+                    magnitude: 30,
+                },
+                Meteor {
+                    shower: Shower::Perseids,
+                    magnitude: 30,
+                },
+            ],
+        };
+
+        let period2 = Period {
+            start_time: Timestamp {
+                hour: 1,
+                minute: 30,
+            },
+            end_time: Timestamp { hour: 2, minute: 0 },
+            date: "13 Aug 2019".to_owned(),
+            teff: 0.5,
+            limiting_magnitude: 5.91,
+            field: Field {
+                ra: 298.0,
+                dec: 56.0,
+            },
+            cloud_factor: 1.08,
+            showers: vec![Shower::Antihelion, Shower::Sporadic, Shower::KappaCygnids],
+            meteors: vec![
+                Meteor {
+                    shower: Shower::Sporadic,
+                    magnitude: 30,
+                },
+                Meteor {
+                    shower: Shower::Sporadic,
+                    magnitude: -10,
+                },
+                Meteor {
+                    shower: Shower::Sporadic,
+                    magnitude: 5,
+                },
+            ],
+        };
+
+        let session = Session {
+            periods: vec![period1, period2],
+        };
+        let (count_csv, distr_csv) = session.get_csvs().unwrap();
+
+        assert_eq!(
+            count_csv,
+            "DATE UT;START;END;Teff;RA;Dec;F;Lm;ANT;;KCG;;PER;;SPO\n12 Aug 2019;2330;30;1;336;52.3;1.05;5.52;-;;C;0;C;7;C;3\n13 Aug 2019;130;200;0.5;298;56;1.08;5.91;C;0;C;0;-;;C;3"
+        );
+
+        assert_eq!(
+            distr_csv,
+            "DATE UT;START;END;SHOWER;-6;-5;-4;-3;-2;-1;0;1;2;3;4;5;6;7
+12 Aug 2019;2330;30;KCG;0;0;0;0;0;0;0;0;0;0;0;0;0;0
+12 Aug 2019;2330;30;PER;0;0;0;0;0;0.5;0.5;0;1;5;0;0;0;0
+12 Aug 2019;2330;30;SPO;0;0;0;0.5;0.5;0;0;0;0;0;1;1;0;0
+13 Aug 2019;130;200;ANT;0;0;0;0;0;0;0;0;0;0;0;0;0;0
+13 Aug 2019;130;200;KCG;0;0;0;0;0;0;0;0;0;0;0;0;0;0
+13 Aug 2019;130;200;SPO;0;0;0;0;0;1;0.5;0.5;0;1;0;0;0;0"
+        );
     }
 }
