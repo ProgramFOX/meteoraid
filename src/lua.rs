@@ -154,6 +154,9 @@ pub fn new_lua() -> Result<Lua, rlua::Error> {
         )?;
         globals.set("showers", showers_fn)?;
 
+        let date_fn = lua_ctx.create_function(|_, date: String| Ok(Event::PeriodDate(date)))?;
+        globals.set("date", date_fn)?;
+
         Ok(())
     })?;
     Ok(l)

@@ -106,6 +106,7 @@ mod tests {
             .execute_multiple_lines(
                 "2237
                  period_start -- and a comment
+                 date(\"12 Aug 2019\")
                  clouds(0)
                  showers(PER, ANT, KCG, SPO)
                  areas(area14(11))
@@ -127,6 +128,7 @@ mod tests {
         interpreter
             .execute_multiple_lines(
                 "period_start << 2237
+                 date(\"12 Aug 2019\")
                  clouds(0)
                  showers(PER, ANT, KCG, SPO)
                  areas(area14(11))
@@ -147,6 +149,7 @@ mod tests {
         assert!(interpreter
             .execute_multiple_lines(
                 "period_start
+                 date(\"12 Aug 2019\")
                  clouds(0)
                  showers(PER, ANT, KCG, SPO)
                  areas(area14(11))
@@ -162,6 +165,7 @@ mod tests {
         interpreter
             .execute_multiple_lines(
                 "period_start << 2237
+                 date(\"12 Aug 2019\")
                  clouds(0)
                  showers(PER, ANT, KCG, SPO)
                  areas(area14(11))
@@ -188,6 +192,7 @@ mod tests {
         interpreter
             .execute_multiple_lines(
                 "period_start << 2237
+                 date(\"12 Aug 2019\")
                  clouds(0)
                  showers(PER, ANT, KCG, SPO)
                  areas(area14(11))
@@ -202,6 +207,7 @@ mod tests {
 
                  0015
                  period_start
+                 date(\"13 Aug 2019\")
                  clouds(5)
                  showers(PER, SPO)
                  areas(area14(10), area7(10))
@@ -230,6 +236,7 @@ mod tests {
             .execute_multiple_lines(
                 "2237
                  period_start
+                 date(\"12 Aug 2019\")
                  clouds(0)
                  showers(PER, ANT, KCG, SPO) << 2238
                  areas(area14(11))

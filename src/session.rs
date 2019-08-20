@@ -16,6 +16,7 @@ pub enum Event {
     Field(Field),
     PeriodStart,
     PeriodEnd,
+    PeriodDate(String),
     Showers(Vec<Shower>),
 }
 
@@ -24,6 +25,7 @@ pub struct TimestampedEvent(pub Timestamp, pub Event);
 pub struct Period {
     pub start_time: Timestamp,
     pub end_time: Timestamp,
+    pub date: String,
     pub teff: f64,
     pub limiting_magnitude: f64,
     pub field: Field,
@@ -61,6 +63,7 @@ mod tests {
         let period = Period {
             start_time: Timestamp { hour: 0, minute: 0 },
             end_time: Timestamp { hour: 0, minute: 0 },
+            date: "12 Aug 2019".to_owned(),
             teff: 0.0,
             limiting_magnitude: 0.0,
             field: Field { ra: 0.0, dec: 0.0 },

@@ -48,6 +48,13 @@ impl SessionBuilder {
             Event::PeriodEnd => {
                 self.current.end_time = Some(timestamp);
             }
+            Event::PeriodDate(date) => {
+                if self.current.date.is_some() {
+                    return Err(BuilderError::AlreadyDate);
+                }
+
+                self.current.date = Some(date);
+            }
             Event::Meteor(meteor) => {
                 if !self
                     .current
@@ -108,6 +115,7 @@ impl SessionBuilder {
 struct IncompletePeriod {
     start_time: Option<Timestamp>,
     end_time: Option<Timestamp>,
+    date: Option<String>,
     field: Option<Field>,
     showers: Option<Vec<Shower>>,
     meteors: Vec<Meteor>,
@@ -122,6 +130,7 @@ impl IncompletePeriod {
         IncompletePeriod {
             start_time: None,
             end_time: None,
+            date: None,
             field: None,
             showers: None,
             meteors: vec![],
@@ -143,8 +152,8 @@ impl IncompletePeriod {
             return Err(BuilderError::UnfinishedBreak);
         }
 
-        if let (Some(start_time), Some(end_time), Some(field)) =
-            (&self.start_time, &self.end_time, &self.field)
+        if let (Some(start_time), Some(end_time), Some(field), Some(date)) =
+            (&self.start_time, &self.end_time, &self.field, &self.date)
         {
             let teff_minutes =
                 match timestamp::effective_time_minutes(*start_time, *end_time, &self.breaks) {
@@ -186,6 +195,7 @@ impl IncompletePeriod {
             Ok(Period {
                 start_time: *start_time,
                 end_time: *end_time,
+                date: date.to_owned(),
                 teff: teff_minutes as f64 / 60f64,
                 limiting_magnitude: lm_avg,
                 field: *field,
@@ -198,10 +208,12 @@ impl IncompletePeriod {
                 &self.start_time.is_none(),
                 &self.end_time.is_none(),
                 &self.field.is_none(),
+                &self.date.is_none(),
             ) {
-                (true, _, _) => Err(BuilderError::NoStartTime),
-                (_, true, _) => Err(BuilderError::NoEndTime),
-                (_, _, true) => Err(BuilderError::NoField),
+                (true, _, _, _) => Err(BuilderError::NoStartTime),
+                (_, true, _, _) => Err(BuilderError::NoEndTime),
+                (_, _, true, _) => Err(BuilderError::NoField),
+                (_, _, _, true) => Err(BuilderError::NoDate),
                 _ => Err(BuilderError::Unknown),
             }
         }
@@ -243,6 +255,8 @@ pub enum BuilderError {
     NoLm,
     NoField,
     NoF,
+    NoDate,
+    AlreadyDate,
     AlreadyField,
     AlreadyShowers,
     InvalidLm,
@@ -269,6 +283,8 @@ impl std::fmt::Display for BuilderError {
                 }
                 BuilderError::NoField => "No field given for this period.",
                 BuilderError::NoF => "No cloud information given for this period.",
+                BuilderError::NoDate => "No date specified for this period.",
+                BuilderError::AlreadyDate => "You already specified a date for this period.",
                 BuilderError::AlreadyField => "You already specified a field for this period.",
                 BuilderError::AlreadyShowers => "You already specified showers for this period.",
                 BuilderError::InvalidLm => "Invalid data for calculating limiting magnitude.",
@@ -507,6 +523,12 @@ mod tests {
         builder
             .register_event(TimestampedEvent(
                 start,
+                Event::PeriodDate("12 Aug 2019".to_owned()),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
                 Event::Showers(vec![Shower::Perseids]),
             ))
             .unwrap();
@@ -572,6 +594,12 @@ mod tests {
         builder
             .register_event(TimestampedEvent(
                 start,
+                Event::PeriodDate("12 Aug 2019".to_owned()),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
                 Event::Showers(vec![Shower::Perseids]),
             ))
             .unwrap();
@@ -619,6 +647,12 @@ mod tests {
         let end2 = Timestamp { hour: 2, minute: 0 };
         builder
             .register_event(TimestampedEvent(start2, Event::PeriodStart))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start2,
+                Event::PeriodDate("12 Aug 2019".to_owned()),
+            ))
             .unwrap();
         builder
             .register_event(TimestampedEvent(
@@ -680,6 +714,12 @@ mod tests {
         builder
             .register_event(TimestampedEvent(
                 start,
+                Event::PeriodDate("12 Aug 2019".to_owned()),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
                 Event::Showers(vec![Shower::Perseids]),
             ))
             .unwrap();
@@ -730,6 +770,12 @@ mod tests {
         };
         builder
             .register_event(TimestampedEvent(start, Event::PeriodStart))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::PeriodDate("12 Aug 2019".to_owned()),
+            ))
             .unwrap();
         builder
             .register_event(TimestampedEvent(
@@ -788,6 +834,12 @@ mod tests {
         builder
             .register_event(TimestampedEvent(
                 start,
+                Event::PeriodDate("12 Aug 2019".to_owned()),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
                 Event::Showers(vec![Shower::Perseids]),
             ))
             .unwrap();
@@ -840,6 +892,12 @@ mod tests {
         };
         builder
             .register_event(TimestampedEvent(start, Event::PeriodStart))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::PeriodDate("12 Aug 2019".to_owned()),
+            ))
             .unwrap();
         builder
             .register_event(TimestampedEvent(
@@ -901,6 +959,12 @@ mod tests {
         builder
             .register_event(TimestampedEvent(
                 start,
+                Event::PeriodDate("12 Aug 2019".to_owned()),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
                 Event::Showers(vec![Shower::Perseids]),
             ))
             .unwrap();
@@ -948,6 +1012,12 @@ mod tests {
         };
         builder
             .register_event(TimestampedEvent(start, Event::PeriodStart))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::PeriodDate("12 Aug 2019".to_owned()),
+            ))
             .unwrap();
         builder
             .register_event(TimestampedEvent(
@@ -1032,6 +1102,12 @@ mod tests {
         builder
             .register_event(TimestampedEvent(
                 start,
+                Event::PeriodDate("12 Aug 2019".to_owned()),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
                 Event::Showers(vec![Shower::Perseids]),
             ))
             .unwrap();
@@ -1093,6 +1169,12 @@ mod tests {
         };
         builder
             .register_event(TimestampedEvent(start, Event::PeriodStart))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::PeriodDate("12 Aug 2019".to_owned()),
+            ))
             .unwrap();
         builder
             .register_event(TimestampedEvent(
@@ -1170,6 +1252,12 @@ mod tests {
         };
         builder
             .register_event(TimestampedEvent(start, Event::PeriodStart))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::PeriodDate("12 Aug 2019".to_owned()),
+            ))
             .unwrap();
         builder
             .register_event(TimestampedEvent(
@@ -1265,6 +1353,12 @@ mod tests {
         builder
             .register_event(TimestampedEvent(
                 start,
+                Event::PeriodDate("12 Aug 2019".to_owned()),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
                 Event::Showers(vec![Shower::Perseids]),
             ))
             .unwrap();
@@ -1323,6 +1417,12 @@ mod tests {
         builder
             .register_event(TimestampedEvent(
                 start,
+                Event::PeriodDate("12 Aug 2019".to_owned()),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
                 Event::Showers(vec![Shower::Perseids]),
             ))
             .unwrap();
@@ -1377,6 +1477,12 @@ mod tests {
         };
         builder
             .register_event(TimestampedEvent(start, Event::PeriodStart))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::PeriodDate("12 Aug 2019".to_owned()),
+            ))
             .unwrap();
         builder
             .register_event(TimestampedEvent(
@@ -1446,6 +1552,12 @@ mod tests {
         builder
             .register_event(TimestampedEvent(
                 start,
+                Event::PeriodDate("12 Aug 2019".to_owned()),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
                 Event::Showers(vec![Shower::Perseids]),
             ))
             .unwrap();
@@ -1509,6 +1621,12 @@ mod tests {
         builder
             .register_event(TimestampedEvent(
                 start,
+                Event::PeriodDate("12 Aug 2019".to_owned()),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
                 Event::AreasCounted(vec![(10, Area(14))]),
             ))
             .unwrap();
@@ -1556,5 +1674,100 @@ mod tests {
             Err(BuilderError::FInsufficientTeff) => {}
             _ => panic!("to_session does not return FInsufficientTeff"),
         }
+    }
+
+    #[test]
+    fn test_builder_17() {
+        let mut builder = SessionBuilder::new();
+        let start = Timestamp {
+            hour: 22,
+            minute: 55,
+        };
+        let end = Timestamp {
+            hour: 1,
+            minute: 20,
+        };
+        builder
+            .register_event(TimestampedEvent(start, Event::PeriodStart))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::Showers(vec![Shower::Perseids]),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::AreasCounted(vec![(10, Area(14))]),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(start, Event::Clouds(0)))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::Field(Field {
+                    ra: 290.0,
+                    dec: 55.0,
+                }),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                Timestamp {
+                    hour: 22,
+                    minute: 57,
+                },
+                Event::Meteor(Meteor {
+                    shower: Shower::Perseids,
+                    magnitude: 35,
+                }),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(end, Event::PeriodEnd))
+            .unwrap();
+
+        match builder.to_session() {
+            Err(BuilderError::NoDate) => {}
+            _ => panic!("to_session does not return NoDate"),
+        };
+    }
+
+    #[test]
+    fn test_builder_18() {
+        let mut builder = SessionBuilder::new();
+        let start = Timestamp {
+            hour: 22,
+            minute: 55,
+        };
+        let end = Timestamp {
+            hour: 1,
+            minute: 20,
+        };
+        builder
+            .register_event(TimestampedEvent(start, Event::PeriodStart))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::Showers(vec![Shower::Perseids]),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::PeriodDate("12 Aug 2019".to_owned()),
+            ))
+            .unwrap();
+        match builder.register_event(TimestampedEvent(
+            start,
+            Event::PeriodDate("13 Aug 2019".to_owned()),
+        )) {
+            Err(BuilderError::AlreadyDate) => {}
+            _ => panic!("register_event does not return AlreadyDate"),
+        };
     }
 }
