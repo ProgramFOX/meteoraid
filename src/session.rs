@@ -111,7 +111,7 @@ impl Session {
             "DATE UT;START;END;Teff;RA;Dec;F;Lm;{}",
             &showers
                 .iter()
-                .map(|s| s.to_imo_code())
+                .map(Shower::to_imo_code)
                 .collect::<Vec<&str>>()
                 .join(";;")
         ));
