@@ -64,6 +64,7 @@ impl Interpreter {
         Ok(())
     }
 
+    #[cfg(test)]
     pub fn execute_multiple_lines(&mut self, code: &str) -> Result<(), Box<dyn std::error::Error>> {
         for line in code.split('\n') {
             self.execute_one_line(line)?;
