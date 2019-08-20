@@ -79,7 +79,6 @@ impl SessionBuilder {
                 let maybe_lm_avg = get_limiting_magnitude_avg(counts);
                 match maybe_lm_avg {
                     Some(lm_avg) => {
-                        println!("{}", lm_avg);
                         self.current.limiting_magnitudes.push((lm_avg, timestamp));
                     }
                     None => Err(BuilderError::InvalidLm)?,
