@@ -1,5 +1,3 @@
-use std::cmp::max;
-
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Timestamp {
     pub hour: u32,

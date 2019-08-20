@@ -1,4 +1,4 @@
-use crate::meteor::{Meteor, Shower};
+use crate::meteor::Meteor;
 use std::cmp::{max, min};
 use std::collections::HashMap;
 

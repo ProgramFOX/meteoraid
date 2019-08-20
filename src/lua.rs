@@ -3,7 +3,7 @@ use crate::field::Field;
 use crate::meteor::{Meteor, Shower};
 use crate::session::Event;
 use rlua;
-use rlua::{Context, FromLua, Function, Lua, UserData};
+use rlua::{Function, Lua, UserData};
 
 impl UserData for Area {}
 impl UserData for Meteor {}

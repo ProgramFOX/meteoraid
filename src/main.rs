@@ -16,8 +16,7 @@ mod timestamp;
 
 use clap::{App, Arg};
 use std::fs;
-use std::io;
-use std::io::{BufRead, BufReader, Write};
+use std::io::{BufRead, BufReader};
 use std::path::Path;
 
 fn main() {
