@@ -54,7 +54,10 @@ impl Period {
         map
     }
 
-    pub fn get_distribution_csv(&self, count_and_dist: &HashMap<Shower, (u32, Distribution)>) -> Result<String, NoneError> {
+    pub fn get_distribution_csv(
+        &self,
+        count_and_dist: &HashMap<Shower, (u32, Distribution)>,
+    ) -> Result<String, NoneError> {
         let mut lines: Vec<String> = vec![];
 
         let mut showers_sorted = self.showers.clone();
