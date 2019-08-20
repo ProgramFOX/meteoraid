@@ -61,7 +61,7 @@ fn main() {
     let mut intrprtr = match interpreter::Interpreter::new() {
         Ok(x) => x,
         Err(e) => {
-            eprintln!("Could not initialize Lua context.");
+            eprintln!("Could not initialize Lua context. Error: {}", e);
             return;
         }
     };
