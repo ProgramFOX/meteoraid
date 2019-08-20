@@ -5,7 +5,7 @@ use std::collections::HashMap;
 pub struct Distribution(Vec<u32>);
 
 impl Distribution {
-    pub fn new() -> Distribution {
+    pub fn new() -> Self {
         let counts = vec![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
         Distribution(counts)
     }

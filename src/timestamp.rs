@@ -5,14 +5,14 @@ pub struct Timestamp {
 }
 
 impl Timestamp {
-    pub fn from_shorthand_int_notation(n: u32) -> Timestamp {
+    pub fn from_shorthand_int_notation(n: u32) -> Self {
         Timestamp {
             hour: n / 100,
             minute: n % 100,
         }
     }
 
-    pub fn incl_is_between(self, a: Timestamp, b: Timestamp) -> bool {
+    pub fn incl_is_between(self, a: Self, b: Self) -> bool {
         let b_hour = if b.hour < a.hour { b.hour + 24 } else { b.hour };
         let self_hour = if self.hour < a.hour {
             self.hour + 24

@@ -12,7 +12,7 @@ pub struct SessionBuilder {
 }
 
 impl SessionBuilder {
-    pub fn new() -> SessionBuilder {
+    pub fn new() -> Self {
         SessionBuilder {
             periods: vec![],
             current: IncompletePeriod::new(),
@@ -121,8 +121,8 @@ struct IncompletePeriod {
 }
 
 impl IncompletePeriod {
-    fn new() -> IncompletePeriod {
-        IncompletePeriod {
+    fn new() -> Self {
+        Self {
             start_time: None,
             end_time: None,
             date: None,
@@ -271,32 +271,30 @@ impl std::fmt::Display for BuilderError {
             f,
             "{}",
             match self {
-                BuilderError::NoStartTime => "No start time given for this period.",
-                BuilderError::NoEndTime => "No end time given for this period.",
-                BuilderError::NoLm => {
-                    "No areas for the calculation of limiting magnitude are counted."
-                }
-                BuilderError::NoField => "No field given for this period.",
-                BuilderError::NoF => "No cloud information given for this period.",
-                BuilderError::NoDate => "No date specified for this period.",
-                BuilderError::AlreadyDate => "You already specified a date for this period.",
-                BuilderError::AlreadyField => "You already specified a field for this period.",
-                BuilderError::AlreadyShowers => "You already specified showers for this period.",
-                BuilderError::InvalidLm => "Invalid data for calculating limiting magnitude.",
-                BuilderError::InBreak => "You can't register events during a break.",
-                BuilderError::NoBreakToEnd => "There is no ongoing break to end.",
-                BuilderError::UnfinishedBreak => "You started a break that didn't end.",
-                BuilderError::InvalidBreaks => "Your breaks do not adhere to the break rules.",
-                BuilderError::LmInsufficientTeff => {
+                Self::NoStartTime => "No start time given for this period.",
+                Self::NoEndTime => "No end time given for this period.",
+                Self::NoLm => "No areas for the calculation of limiting magnitude are counted.",
+                Self::NoField => "No field given for this period.",
+                Self::NoF => "No cloud information given for this period.",
+                Self::NoDate => "No date specified for this period.",
+                Self::AlreadyDate => "You already specified a date for this period.",
+                Self::AlreadyField => "You already specified a field for this period.",
+                Self::AlreadyShowers => "You already specified showers for this period.",
+                Self::InvalidLm => "Invalid data for calculating limiting magnitude.",
+                Self::InBreak => "You can't register events during a break.",
+                Self::NoBreakToEnd => "There is no ongoing break to end.",
+                Self::UnfinishedBreak => "You started a break that didn't end.",
+                Self::InvalidBreaks => "Your breaks do not adhere to the break rules.",
+                Self::LmInsufficientTeff => {
                     "Your recorded limiting magnitudes do not span your whole period."
                 }
-                BuilderError::FInsufficientTeff => {
+                Self::FInsufficientTeff => {
                     "Your recorded cloud estimates do not span your whole period."
                 }
-                BuilderError::NotObservingShower => {
+                Self::NotObservingShower => {
                     "Meteor belongs to a shower that you are not observing."
                 }
-                BuilderError::Unknown => "unexpected error",
+                Self::Unknown => "unexpected error",
             }
         )
     }

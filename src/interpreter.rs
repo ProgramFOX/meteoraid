@@ -11,8 +11,8 @@ pub struct Interpreter {
 }
 
 impl Interpreter {
-    pub fn new() -> Result<Interpreter, rlua::Error> {
-        Ok(Interpreter {
+    pub fn new() -> Result<Self, rlua::Error> {
+        Ok(Self {
             session_builder: SessionBuilder::new(),
             time_checkpoint: None,
             lua: lua::new_lua()?,
@@ -87,7 +87,7 @@ impl std::fmt::Display for InterpreterError {
             f,
             "{}",
             match self {
-                InterpreterError::NoTimeCheckpoint => "No time checkpoint has been given.",
+                Self::NoTimeCheckpoint => "No time checkpoint has been given.",
             }
         )
     }
