@@ -3,7 +3,7 @@ use crate::distribution::Distribution;
 use crate::field::Field;
 use crate::meteor::{Meteor, Shower};
 use crate::timestamp::Timestamp;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::option::NoneError;
 
 #[derive(Clone, PartialEq, Debug)]
@@ -82,6 +82,18 @@ impl Period {
             ));
         }
         Ok(lines.join("\n"))
+    }
+}
+
+impl Session {
+    fn all_showers(&self) -> HashSet<Shower> {
+        let mut result = HashSet::new();
+        for period in &self.periods {
+            for shower in &period.showers {
+                result.insert(*shower);
+            }
+        }
+        result
     }
 }
 
@@ -224,5 +236,43 @@ mod tests {
             period.get_distribution_csv().unwrap(),
             "12 Aug 2019;0;30;PER;0;0;0;0;0;0.5;0.5;0;1;5;0;0;0;0\n12 Aug 2019;0;30;SPO;0;0;0;0.5;0.5;0;0;0;0;0;1;1;0;0".to_string()
         );
+    }
+
+    #[test]
+    fn test_all_showers() {
+        let period1 = Period {
+            start_time: Timestamp { hour: 0, minute: 0 },
+            end_time: Timestamp { hour: 0, minute: 0 },
+            date: "12 Aug 2019".to_owned(),
+            teff: 0.0,
+            limiting_magnitude: 0.0,
+            field: Field { ra: 0.0, dec: 0.0 },
+            cloud_factor: 1.0,
+            showers: vec![Shower::Perseids, Shower::Antihelion, Shower::Sporadic],
+            meteors: vec![],
+        };
+
+        let period2 = Period {
+            start_time: Timestamp { hour: 0, minute: 0 },
+            end_time: Timestamp { hour: 0, minute: 0 },
+            date: "12 Aug 2019".to_owned(),
+            teff: 0.0,
+            limiting_magnitude: 0.0,
+            field: Field { ra: 0.0, dec: 0.0 },
+            cloud_factor: 1.0,
+            showers: vec![Shower::KappaCygnids, Shower::Sporadic],
+            meteors: vec![],
+        };
+
+        let session = Session {
+            periods: vec![period1, period2],
+        };
+
+        let mut expected = HashSet::new();
+        expected.insert(Shower::Perseids);
+        expected.insert(Shower::Antihelion);
+        expected.insert(Shower::KappaCygnids);
+        expected.insert(Shower::Sporadic);
+        assert_eq!(session.all_showers(), expected);
     }
 }
