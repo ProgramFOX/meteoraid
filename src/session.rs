@@ -113,19 +113,19 @@ mod tests {
         let perseid_info = cd.get(&Shower::Perseids).unwrap();
         assert_eq!(perseid_info.0, 7);
         let perseid_distr_map = perseid_info.1.to_map();
-        assert_eq!(*perseid_distr_map.get(&30).unwrap(), 50);
-        assert_eq!(*perseid_distr_map.get(&20).unwrap(), 10);
+        assert_eq!(*perseid_distr_map.get(&3).unwrap(), 50);
+        assert_eq!(*perseid_distr_map.get(&2).unwrap(), 10);
         assert_eq!(*perseid_distr_map.get(&0).unwrap(), 5);
-        assert_eq!(*perseid_distr_map.get(&-10).unwrap(), 5);
-        assert_eq!(*perseid_distr_map.get(&-60).unwrap(), 0);
+        assert_eq!(*perseid_distr_map.get(&-1).unwrap(), 5);
+        assert_eq!(*perseid_distr_map.get(&-6).unwrap(), 0);
 
         let sporadic_info = cd.get(&Shower::Sporadic).unwrap();
         assert_eq!(sporadic_info.0, 3);
         let sporadic_distr_map = sporadic_info.1.to_map();
-        assert_eq!(*sporadic_distr_map.get(&-30).unwrap(), 5);
-        assert_eq!(*sporadic_distr_map.get(&-20).unwrap(), 5);
-        assert_eq!(*sporadic_distr_map.get(&40).unwrap(), 10);
-        assert_eq!(*sporadic_distr_map.get(&50).unwrap(), 10);
-        assert_eq!(*sporadic_distr_map.get(&10).unwrap(), 0);
+        assert_eq!(*sporadic_distr_map.get(&-3).unwrap(), 5);
+        assert_eq!(*sporadic_distr_map.get(&-2).unwrap(), 5);
+        assert_eq!(*sporadic_distr_map.get(&4).unwrap(), 10);
+        assert_eq!(*sporadic_distr_map.get(&5).unwrap(), 10);
+        assert_eq!(*sporadic_distr_map.get(&1).unwrap(), 0);
     }
 }

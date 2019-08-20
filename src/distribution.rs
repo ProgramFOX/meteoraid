@@ -23,20 +23,20 @@ impl Distribution {
 
     pub fn to_map(&self) -> HashMap<i32, u32> {
         let mut map = HashMap::new();
-        map.insert(-60, self.0[0]);
-        map.insert(-50, self.0[1]);
-        map.insert(-40, self.0[2]);
-        map.insert(-30, self.0[3]);
-        map.insert(-20, self.0[4]);
-        map.insert(-10, self.0[5]);
+        map.insert(-6, self.0[0]);
+        map.insert(-5, self.0[1]);
+        map.insert(-4, self.0[2]);
+        map.insert(-3, self.0[3]);
+        map.insert(-2, self.0[4]);
+        map.insert(-1, self.0[5]);
         map.insert(0, self.0[6]);
-        map.insert(10, self.0[7]);
-        map.insert(20, self.0[8]);
-        map.insert(30, self.0[9]);
-        map.insert(40, self.0[10]);
-        map.insert(50, self.0[11]);
-        map.insert(60, self.0[12]);
-        map.insert(70, self.0[13]);
+        map.insert(1, self.0[7]);
+        map.insert(2, self.0[8]);
+        map.insert(3, self.0[9]);
+        map.insert(4, self.0[10]);
+        map.insert(5, self.0[11]);
+        map.insert(6, self.0[12]);
+        map.insert(7, self.0[13]);
         map
     }
 }
@@ -54,7 +54,7 @@ mod tests {
         });
         assert_eq!(distr.0, vec![0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0]);
         let map = distr.to_map();
-        assert_eq!(map.get(&20), Some(&10));
+        assert_eq!(map.get(&2), Some(&10));
     }
 
     #[test]
@@ -66,8 +66,8 @@ mod tests {
         });
         assert_eq!(distr.0, vec![0, 0, 0, 0, 0, 0, 0, 5, 5, 0, 0, 0, 0, 0]);
         let map = distr.to_map();
-        assert_eq!(map.get(&10), Some(&5));
-        assert_eq!(map.get(&20), Some(&5));
+        assert_eq!(map.get(&1), Some(&5));
+        assert_eq!(map.get(&2), Some(&5));
     }
 
     #[test]
@@ -79,8 +79,8 @@ mod tests {
         });
         assert_eq!(distr.0, vec![0, 0, 0, 0, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0]);
         let map = distr.to_map();
-        assert_eq!(map.get(&-10), Some(&5));
-        assert_eq!(map.get(&-20), Some(&5));
+        assert_eq!(map.get(&-1), Some(&5));
+        assert_eq!(map.get(&-2), Some(&5));
     }
 
     #[test]
@@ -92,7 +92,7 @@ mod tests {
         });
         assert_eq!(distr.0, vec![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10]);
         let map = distr.to_map();
-        assert_eq!(map.get(&70), Some(&10));
+        assert_eq!(map.get(&7), Some(&10));
     }
 
     #[test]
@@ -104,7 +104,7 @@ mod tests {
         });
         assert_eq!(distr.0, vec![10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
         let map = distr.to_map();
-        assert_eq!(map.get(&-60), Some(&10));
+        assert_eq!(map.get(&-6), Some(&10));
     }
 
     #[test]
