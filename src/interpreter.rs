@@ -72,7 +72,7 @@ impl Interpreter {
         Ok(())
     }
 
-    pub fn get_session(mut self) -> Result<Session, BuilderError> {
+    pub fn get_session(self) -> Result<Session, BuilderError> {
         self.session_builder.to_session()
     }
 }
