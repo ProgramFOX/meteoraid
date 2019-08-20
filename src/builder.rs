@@ -13,7 +13,7 @@ pub struct SessionBuilder {
 
 impl SessionBuilder {
     pub fn new() -> Self {
-        SessionBuilder {
+        Self {
             periods: vec![],
             current: IncompletePeriod::new(),
         }

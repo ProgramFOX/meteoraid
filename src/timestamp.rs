@@ -6,7 +6,7 @@ pub struct Timestamp {
 
 impl Timestamp {
     pub fn from_shorthand_int_notation(n: u32) -> Self {
-        Timestamp {
+        Self {
             hour: n / 100,
             minute: n % 100,
         }
@@ -54,7 +54,7 @@ impl std::ops::Sub for Timestamp {
 
     // self - other
     // if self < other, assume self is the next day
-    fn sub(self, other: Timestamp) -> u32 {
+    fn sub(self, other: Self) -> u32 {
         let self_hour =
             if self.hour < other.hour || (self.hour == other.hour && self.minute < other.minute) {
                 self.hour + 24

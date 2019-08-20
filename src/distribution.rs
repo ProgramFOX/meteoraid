@@ -7,7 +7,7 @@ pub struct Distribution(Vec<u32>);
 impl Distribution {
     pub fn new() -> Self {
         let counts = vec![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-        Distribution(counts)
+        Self(counts)
     }
 
     pub fn add_meteor(&mut self, meteor: Meteor) {
