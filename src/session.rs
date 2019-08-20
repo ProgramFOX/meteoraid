@@ -54,9 +54,9 @@ impl Period {
         map
     }
 
-    pub fn get_distribution_csv(&self) -> Result<String, NoneError> {
+    pub fn get_distribution_csv(&self, count_and_dist: &HashMap<Shower, (u32, Distribution)>) -> Result<String, NoneError> {
         let mut lines: Vec<String> = vec![];
-        let count_and_dist = self.get_count_and_distribution();
+
         let mut showers_sorted = self.showers.clone();
         showers_sorted.sort_by(|a, b| a.to_imo_code().cmp(b.to_imo_code()));
 
@@ -118,7 +118,7 @@ impl Session {
             .push("DATE UT;START;END;SHOWER;-6;-5;-4;-3;-2;-1;0;1;2;3;4;5;6;7".to_owned());
         for period in &self.periods {
             let count_and_dist = period.get_count_and_distribution();
-            distr_csv_parts.push(period.get_distribution_csv()?);
+            distr_csv_parts.push(period.get_distribution_csv(&count_and_dist)?);
 
             let mut count_parts: Vec<String> = vec![];
             for shower in &showers {
@@ -281,7 +281,7 @@ mod tests {
             ],
         };
         assert_eq!(
-            period.get_distribution_csv().unwrap(),
+            period.get_distribution_csv(&period.get_count_and_distribution()).unwrap(),
             "12 Aug 2019;0;30;PER;0;0;0;0;0;0.5;0.5;0;1;5;0;0;0;0\n12 Aug 2019;0;30;SPO;0;0;0;0.5;0.5;0;0;0;0;0;1;1;0;0".to_string()
         );
     }
