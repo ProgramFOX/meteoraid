@@ -19,8 +19,8 @@ impl SessionBuilder {
         }
     }
 
-    pub fn to_session(mut self) -> Result<Session, BuilderError> {
-        self.periods.push(self.current.to_period()?);
+    pub fn into_session(mut self) -> Result<Session, BuilderError> {
+        self.periods.push(self.current.into_period()?);
         Ok(Session {
             periods: self.periods,
         })
@@ -32,7 +32,7 @@ impl SessionBuilder {
         if self.current.current_break.is_some() {
             match event {
                 Event::BreakEnd => {}
-                _ => Err(BuilderError::InBreak)?,
+                _ => return Err(BuilderError::InBreak),
             }
         }
 
@@ -40,7 +40,7 @@ impl SessionBuilder {
             Event::NewPeriod => {
                 let mut c = IncompletePeriod::new();
                 std::mem::swap(&mut c, &mut self.current);
-                self.periods.push(c.to_period()?);
+                self.periods.push(c.into_period()?);
             }
             Event::PeriodStart => {
                 self.current.start_time = Some(timestamp);
@@ -68,9 +68,7 @@ impl SessionBuilder {
                 self.current.meteors.push(meteor);
             }
             Event::Field(field) => match self.current.field {
-                Some(_) => {
-                    Err(BuilderError::AlreadyField)?;
-                }
+                Some(_) => return Err(BuilderError::AlreadyField),
                 None => {
                     self.current.field = Some(field);
                 }
@@ -81,7 +79,7 @@ impl SessionBuilder {
                     Some(lm_avg) => {
                         self.current.limiting_magnitudes.push((lm_avg, timestamp));
                     }
-                    None => Err(BuilderError::InvalidLm)?,
+                    None => return Err(BuilderError::InvalidLm),
                 }
             }
             Event::Clouds(clouds) => {
@@ -95,9 +93,7 @@ impl SessionBuilder {
                     self.current.breaks.push((br, timestamp));
                     self.current.current_break = None;
                 }
-                None => {
-                    Err(BuilderError::NoBreakToEnd)?;
-                }
+                None => return Err(BuilderError::NoBreakToEnd),
             },
             Event::Showers(showers) => {
                 if self.current.showers.is_some() {
@@ -140,11 +136,11 @@ impl IncompletePeriod {
         }
     }
 
-    fn to_period(self) -> Result<Period, BuilderError> {
-        if self.clouds.len() == 0 {
+    fn into_period(self) -> Result<Period, BuilderError> {
+        if self.clouds.is_empty() {
             return Err(BuilderError::NoF);
         }
-        if self.limiting_magnitudes.len() == 0 {
+        if self.limiting_magnitudes.is_empty() {
             return Err(BuilderError::NoLm);
         }
         if self.current_break.is_some() {
@@ -195,11 +191,11 @@ impl IncompletePeriod {
                 start_time: *start_time,
                 end_time: *end_time,
                 date: date.to_owned(),
-                teff: teff_minutes as f64 / 60f64,
+                teff: f64::from(teff_minutes) / 60f64,
                 limiting_magnitude: lm_avg,
                 field: *field,
                 cloud_factor,
-                showers: self.showers.unwrap_or(vec![]),
+                showers: self.showers.unwrap_or_else(|| vec![]),
                 meteors: self.meteors,
             })
         } else {
@@ -220,9 +216,9 @@ impl IncompletePeriod {
 }
 
 fn checkpoints_to_durations<T>(
-    cs: &Vec<(T, Timestamp)>,
+    cs: &[(T, Timestamp)],
     end: Timestamp,
-    breaks: &Vec<(Timestamp, Timestamp)>,
+    breaks: &[(Timestamp, Timestamp)],
 ) -> Option<Vec<(T, u32)>>
 where
     T: Default + std::ops::Sub + Copy,
@@ -565,7 +561,7 @@ mod tests {
             .register_event(TimestampedEvent(end, Event::PeriodEnd))
             .unwrap();
 
-        let session = builder.to_session().unwrap();
+        let session = builder.into_session().unwrap();
         assert_eq!(session.periods.len(), 1);
         let period = &session.periods[0];
         assert_eq!(period.start_time, start);
@@ -675,7 +671,7 @@ mod tests {
             .register_event(TimestampedEvent(end2, Event::PeriodEnd))
             .unwrap();
 
-        let session = builder.to_session().unwrap();
+        let session = builder.into_session().unwrap();
         assert_eq!(session.periods.len(), 2);
         let period = &session.periods[0];
         assert_eq!(period.start_time, start);
@@ -750,9 +746,9 @@ mod tests {
             .register_event(TimestampedEvent(end, Event::PeriodEnd))
             .unwrap();
 
-        match builder.to_session() {
+        match builder.into_session() {
             Err(BuilderError::NoLm) => {}
-            _ => panic!("to_session does not return NoLm"),
+            _ => panic!("into_session does not return NoLm"),
         };
     }
 
@@ -813,9 +809,9 @@ mod tests {
             .register_event(TimestampedEvent(end, Event::PeriodEnd))
             .unwrap();
 
-        match builder.to_session() {
+        match builder.into_session() {
             Err(BuilderError::NoF) => {}
-            _ => panic!("to_session does not return NoF"),
+            _ => panic!("into_session does not return NoF"),
         };
     }
 
@@ -876,9 +872,9 @@ mod tests {
             .register_event(TimestampedEvent(end, Event::PeriodEnd))
             .unwrap();
 
-        match builder.to_session() {
+        match builder.into_session() {
             Err(BuilderError::NoStartTime) => {}
-            _ => panic!("to_session does not return NoStartTime"),
+            _ => panic!("into_session does not return NoStartTime"),
         };
     }
 
@@ -935,9 +931,9 @@ mod tests {
             ))
             .unwrap();
 
-        match builder.to_session() {
+        match builder.into_session() {
             Err(BuilderError::NoEndTime) => {}
-            _ => panic!("to_session does not return NoEndTime"),
+            _ => panic!("into_session does not return NoEndTime"),
         };
     }
 
@@ -992,9 +988,9 @@ mod tests {
             .register_event(TimestampedEvent(end, Event::PeriodEnd))
             .unwrap();
 
-        match builder.to_session() {
+        match builder.into_session() {
             Err(BuilderError::NoField) => {}
-            _ => panic!("to_session does not return NoField"),
+            _ => panic!("into_session does not return NoField"),
         };
     }
 
@@ -1073,7 +1069,7 @@ mod tests {
             .register_event(TimestampedEvent(end, Event::PeriodEnd))
             .unwrap();
 
-        let session = builder.to_session().unwrap();
+        let session = builder.into_session().unwrap();
         assert_eq!(session.periods.len(), 1);
         let period = &session.periods[0];
         assert_eq!(period.start_time, start);
@@ -1090,10 +1086,6 @@ mod tests {
         let start = Timestamp {
             hour: 22,
             minute: 55,
-        };
-        let end = Timestamp {
-            hour: 1,
-            minute: 20,
         };
         builder
             .register_event(TimestampedEvent(start, Event::PeriodStart))
@@ -1227,7 +1219,7 @@ mod tests {
             .register_event(TimestampedEvent(end, Event::PeriodEnd))
             .unwrap();
 
-        let session = builder.to_session().unwrap();
+        let session = builder.into_session().unwrap();
         assert_eq!(session.periods.len(), 1);
         let period = &session.periods[0];
         assert_eq!(period.start_time, start);
@@ -1328,7 +1320,7 @@ mod tests {
             .register_event(TimestampedEvent(end, Event::PeriodEnd))
             .unwrap();
 
-        let session = builder.to_session().unwrap();
+        let session = builder.into_session().unwrap();
         assert_eq!(session.periods.len(), 1);
         let period = &session.periods[0];
         assert_eq!(period.start_time, start);
@@ -1597,9 +1589,9 @@ mod tests {
             .register_event(TimestampedEvent(end, Event::PeriodEnd))
             .unwrap();
 
-        match builder.to_session() {
+        match builder.into_session() {
             Err(BuilderError::LmInsufficientTeff) => {}
-            _ => panic!("to_session does not return LmInsufficientTeff"),
+            _ => panic!("into_session does not return LmInsufficientTeff"),
         }
     }
 
@@ -1669,9 +1661,9 @@ mod tests {
             .register_event(TimestampedEvent(end, Event::PeriodEnd))
             .unwrap();
 
-        match builder.to_session() {
+        match builder.into_session() {
             Err(BuilderError::FInsufficientTeff) => {}
-            _ => panic!("to_session does not return FInsufficientTeff"),
+            _ => panic!("into_session does not return FInsufficientTeff"),
         }
     }
 
@@ -1729,9 +1721,9 @@ mod tests {
             .register_event(TimestampedEvent(end, Event::PeriodEnd))
             .unwrap();
 
-        match builder.to_session() {
+        match builder.into_session() {
             Err(BuilderError::NoDate) => {}
-            _ => panic!("to_session does not return NoDate"),
+            _ => panic!("into_session does not return NoDate"),
         };
     }
 
@@ -1741,10 +1733,6 @@ mod tests {
         let start = Timestamp {
             hour: 22,
             minute: 55,
-        };
-        let end = Timestamp {
-            hour: 1,
-            minute: 20,
         };
         builder
             .register_event(TimestampedEvent(start, Event::PeriodStart))

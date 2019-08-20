@@ -12,7 +12,7 @@ impl Timestamp {
         }
     }
 
-    pub fn incl_is_between(&self, a: Timestamp, b: Timestamp) -> bool {
+    pub fn incl_is_between(self, a: Timestamp, b: Timestamp) -> bool {
         let b_hour = if b.hour < a.hour { b.hour + 24 } else { b.hour };
         let self_hour = if self.hour < a.hour {
             self.hour + 24
@@ -25,7 +25,7 @@ impl Timestamp {
         a_total_min <= self_total_min && self_total_min <= b_total_min
     }
 
-    pub fn to_shorthand_int_notation(&self) -> u32 {
+    pub fn to_shorthand_int_notation(self) -> u32 {
         self.hour * 100 + self.minute
     }
 }
@@ -33,7 +33,7 @@ impl Timestamp {
 pub fn effective_time_minutes(
     start: Timestamp,
     end: Timestamp,
-    breaks: &Vec<(Timestamp, Timestamp)>,
+    breaks: &[(Timestamp, Timestamp)],
 ) -> Option<u32> {
     let mut minutes = end - start;
     for b in breaks {
@@ -48,6 +48,7 @@ pub fn effective_time_minutes(
     Some(minutes)
 }
 
+#[allow(clippy::suspicious_arithmetic_impl)]
 impl std::ops::Sub for Timestamp {
     type Output = u32;
 

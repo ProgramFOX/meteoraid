@@ -37,6 +37,7 @@ fn runtime_error(desc: &str) -> rlua::Error {
     rlua::Error::RuntimeError(String::from(desc))
 }
 
+#[allow(clippy::type_complexity)]
 pub fn new_lua() -> Result<Lua, rlua::Error> {
     let l = Lua::new();
     l.context(|lua_ctx| -> Result<(), rlua::Error> {
@@ -111,7 +112,7 @@ pub fn new_lua() -> Result<Lua, rlua::Error> {
                         counts.0, counts.1, counts.2, counts.3, counts.4, counts.5, counts.6,
                         counts.7, counts.8, counts.9, counts.10, counts.11,
                     ]
-                    .into_iter()
+                    .iter()
                     .flatten()
                     .map(|c| (c.0, c.1))
                     .collect(),
@@ -145,9 +146,9 @@ pub fn new_lua() -> Result<Lua, rlua::Error> {
                         showers.0, showers.1, showers.2, showers.3, showers.4, showers.5,
                         showers.6, showers.7, showers.8, showers.9, showers.10, showers.11,
                     ]
-                    .into_iter()
+                    .iter()
                     .flatten()
-                    .map(|s| *s)
+                    .copied()
                     .collect(),
                 ))
             },

@@ -140,7 +140,6 @@ fn main() {
                     Ok(_) => println!("Distribution CSV written to {}.", &output_distr_path),
                     Err(e) => {
                         eprintln!("Error while writing distribution CSV: {}", e);
-                        return;
                     }
                 }
             } else {

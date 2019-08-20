@@ -1,3 +1,4 @@
+#[allow(clippy::approx_constant)]
 pub const AREAS: [&[f64]; 30] = [
     &[
         3.08, 3.18, 3.57, 3.74, 4.23, 4.78, 4.83, 5.00, 5.08, 5.25, 5.96, 6.06, 6.28, 6.42, 6.50,
@@ -177,7 +178,7 @@ pub fn get_limiting_magnitude(stars: usize, area: Area) -> Option<f64> {
     let Area(area_number) = area;
     AREAS
         .get(area_number - 1)
-        .and_then(|a| a.get(stars - 1).map(|s| *s))
+        .and_then(|a| a.get(stars - 1).copied())
 }
 
 pub fn get_limiting_magnitude_avg(counts: Vec<(usize, Area)>) -> Option<f64> {
@@ -188,7 +189,7 @@ pub fn get_limiting_magnitude_avg(counts: Vec<(usize, Area)>) -> Option<f64> {
         .collect();
     lms.sort_by(|a, b| a.partial_cmp(b).unwrap());
 
-    if lms.len() == 0 || lms.len() != counts.len() {
+    if lms.is_empty() || lms.len() != counts.len() {
         return None;
     } else if lms.len() == 1 {
         return Some(lms[0]);
@@ -211,7 +212,7 @@ pub fn get_limiting_magnitude_avg(counts: Vec<(usize, Area)>) -> Option<f64> {
         }
     }
 
-    if selected.len() == 0 {
+    if selected.is_empty() {
         // Every magnitude lies in such a gap so let's take the overall average.
         Some(((lms.iter().sum::<f64>() / (lms.len() as f64)) * 100f64).round() / 100f64)
     } else {

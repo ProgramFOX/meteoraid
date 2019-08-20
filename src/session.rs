@@ -49,7 +49,7 @@ impl Period {
         for meteor in &self.meteors {
             let mut cd = map.get_mut(&meteor.shower).unwrap();
             cd.0 += 1;
-            cd.1.add_meteor(&meteor);
+            cd.1.add_meteor(*meteor);
         }
         map
     }
@@ -71,20 +71,20 @@ impl Period {
                 self.start_time.to_shorthand_int_notation(),
                 self.end_time.to_shorthand_int_notation(),
                 shower.to_imo_code(),
-                *shower_dist.get(&-6)? as f64 / 10.0,
-                *shower_dist.get(&-5)? as f64 / 10.0,
-                *shower_dist.get(&-4)? as f64 / 10.0,
-                *shower_dist.get(&-3)? as f64 / 10.0,
-                *shower_dist.get(&-2)? as f64 / 10.0,
-                *shower_dist.get(&-1)? as f64 / 10.0,
-                *shower_dist.get(&0)? as f64 / 10.0,
-                *shower_dist.get(&1)? as f64 / 10.0,
-                *shower_dist.get(&2)? as f64 / 10.0,
-                *shower_dist.get(&3)? as f64 / 10.0,
-                *shower_dist.get(&4)? as f64 / 10.0,
-                *shower_dist.get(&5)? as f64 / 10.0,
-                *shower_dist.get(&6)? as f64 / 10.0,
-                *shower_dist.get(&7)? as f64 / 10.0,
+                f64::from(*shower_dist.get(&-6)?) / 10.0,
+                f64::from(*shower_dist.get(&-5)?) / 10.0,
+                f64::from(*shower_dist.get(&-4)?) / 10.0,
+                f64::from(*shower_dist.get(&-3)?) / 10.0,
+                f64::from(*shower_dist.get(&-2)?) / 10.0,
+                f64::from(*shower_dist.get(&-1)?) / 10.0,
+                f64::from(*shower_dist.get(&0)?) / 10.0,
+                f64::from(*shower_dist.get(&1)?) / 10.0,
+                f64::from(*shower_dist.get(&2)?) / 10.0,
+                f64::from(*shower_dist.get(&3)?) / 10.0,
+                f64::from(*shower_dist.get(&4)?) / 10.0,
+                f64::from(*shower_dist.get(&5)?) / 10.0,
+                f64::from(*shower_dist.get(&6)?) / 10.0,
+                f64::from(*shower_dist.get(&7)?) / 10.0,
             ));
         }
         Ok(lines.join("\n"))

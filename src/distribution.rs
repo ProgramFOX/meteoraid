@@ -10,7 +10,7 @@ impl Distribution {
         Distribution(counts)
     }
 
-    pub fn add_meteor(&mut self, meteor: &Meteor) {
+    pub fn add_meteor(&mut self, meteor: Meteor) {
         let mag = max(-60, min(70, meteor.magnitude));
         let counts = &mut self.0;
         if mag % 10 == 0 {
@@ -49,7 +49,7 @@ mod tests {
     #[test]
     fn test_distr_1() {
         let mut distr = Distribution::new();
-        distr.add_meteor(&Meteor {
+        distr.add_meteor(Meteor {
             shower: Shower::Perseids,
             magnitude: 20,
         });
@@ -61,7 +61,7 @@ mod tests {
     #[test]
     fn test_distr_2() {
         let mut distr = Distribution::new();
-        distr.add_meteor(&Meteor {
+        distr.add_meteor(Meteor {
             shower: Shower::Perseids,
             magnitude: 15,
         });
@@ -74,7 +74,7 @@ mod tests {
     #[test]
     fn test_distr_3() {
         let mut distr = Distribution::new();
-        distr.add_meteor(&Meteor {
+        distr.add_meteor(Meteor {
             shower: Shower::Perseids,
             magnitude: -15,
         });
@@ -87,7 +87,7 @@ mod tests {
     #[test]
     fn test_distr_4() {
         let mut distr = Distribution::new();
-        distr.add_meteor(&Meteor {
+        distr.add_meteor(Meteor {
             shower: Shower::Perseids,
             magnitude: 75,
         });
@@ -99,7 +99,7 @@ mod tests {
     #[test]
     fn test_distr_5() {
         let mut distr = Distribution::new();
-        distr.add_meteor(&Meteor {
+        distr.add_meteor(Meteor {
             shower: Shower::Perseids,
             magnitude: -65,
         });
@@ -111,43 +111,43 @@ mod tests {
     #[test]
     fn test_distr_6() {
         let mut distr = Distribution::new();
-        distr.add_meteor(&Meteor {
+        distr.add_meteor(Meteor {
             shower: Shower::Perseids,
             magnitude: 30,
         });
-        distr.add_meteor(&Meteor {
+        distr.add_meteor(Meteor {
             shower: Shower::Perseids,
             magnitude: 30,
         });
-        distr.add_meteor(&Meteor {
+        distr.add_meteor(Meteor {
             shower: Shower::Perseids,
             magnitude: 10,
         });
-        distr.add_meteor(&Meteor {
+        distr.add_meteor(Meteor {
             shower: Shower::Perseids,
             magnitude: 25,
         });
-        distr.add_meteor(&Meteor {
+        distr.add_meteor(Meteor {
             shower: Shower::Perseids,
             magnitude: -15,
         });
-        distr.add_meteor(&Meteor {
+        distr.add_meteor(Meteor {
             shower: Shower::Perseids,
             magnitude: 50,
         });
-        distr.add_meteor(&Meteor {
+        distr.add_meteor(Meteor {
             shower: Shower::Perseids,
             magnitude: 40,
         });
-        distr.add_meteor(&Meteor {
+        distr.add_meteor(Meteor {
             shower: Shower::Perseids,
             magnitude: 45,
         });
-        distr.add_meteor(&Meteor {
+        distr.add_meteor(Meteor {
             shower: Shower::Perseids,
             magnitude: 0,
         });
-        distr.add_meteor(&Meteor {
+        distr.add_meteor(Meteor {
             shower: Shower::Perseids,
             magnitude: -5,
         });

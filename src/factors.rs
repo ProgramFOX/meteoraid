@@ -1,20 +1,20 @@
-pub fn cloud_factor(cloud_estimates: &Vec<(u8, u32)>) -> f64 {
+pub fn cloud_factor(cloud_estimates: &[(u8, u32)]) -> f64 {
     let teff = cloud_estimates.iter().fold(0u32, |acc, &item| acc + item.1);
-    let k = (1f64 / teff as f64)
+    let k = (1f64 / f64::from(teff))
         * (cloud_estimates.iter().fold(0f64, |acc, &item| {
-            acc + (item.0 as f64 / 100f64) * item.1 as f64
+            acc + (f64::from(item.0) / 100f64) * f64::from(item.1)
         }));
     ((1f64 / (1f64 - k)) * 100f64).round() / 100f64
 }
 
-pub fn limiting_magnitude(limiting_magnitude_measures: &Vec<(f64, u32)>) -> f64 {
+pub fn limiting_magnitude(limiting_magnitude_measures: &[(f64, u32)]) -> f64 {
     let teff = limiting_magnitude_measures
         .iter()
         .fold(0u32, |acc, &item| acc + item.1);
-    (((1f64 / teff as f64)
+    (((1f64 / f64::from(teff))
         * (limiting_magnitude_measures
             .iter()
-            .fold(0f64, |acc, &item| acc + item.0 * item.1 as f64)))
+            .fold(0f64, |acc, &item| acc + item.0 * f64::from(item.1))))
         * 100f64)
         .round()
         / 100f64

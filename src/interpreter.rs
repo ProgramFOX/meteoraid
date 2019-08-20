@@ -22,16 +22,15 @@ impl Interpreter {
     pub fn execute_one_line(&mut self, line: &str) -> Result<(), Box<dyn std::error::Error>> {
         let code = line
             .split("--")
-            .into_iter()
             .next()
             .expect("[supposedly unreachable] Split has no values")
             .trim();
 
-        if code.len() == 0 {
+        if code.is_empty() {
             return Ok(());
         }
 
-        let mut split = code.split("<<").into_iter();
+        let mut split = code.split("<<");
         let code = split
             .next()
             .expect("[supposedly unreachable] Split has no values (2)")
@@ -57,7 +56,7 @@ impl Interpreter {
                             TimestampedEvent(time, lua::run_code(code, &self.lua)?);
                         self.session_builder.register_event(time_and_event)?;
                     }
-                    None => Err(InterpreterError::NoTimeCheckpoint)?,
+                    None => return Err(Box::new(InterpreterError::NoTimeCheckpoint)),
                 }
             }
         };
@@ -73,7 +72,7 @@ impl Interpreter {
     }
 
     pub fn get_session(self) -> Result<Session, BuilderError> {
-        self.session_builder.to_session()
+        self.session_builder.into_session()
     }
 }
 
