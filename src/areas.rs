@@ -214,9 +214,9 @@ pub fn get_limiting_magnitude_avg(counts: Vec<(usize, Area)>) -> Option<f64> {
 
     if selected.is_empty() {
         // Every magnitude lies in such a gap so let's take the overall average.
-        Some(((lms.iter().sum::<f64>() / (lms.len() as f64)) * 100f64).round() / 100f64)
+        Some(((lms.iter().sum::<f64>() / (lms.len() as f64)) * 100_f64).round() / 100_f64)
     } else {
-        Some(((selected.iter().sum::<f64>() / (selected.len() as f64)) * 100f64).round() / 100f64)
+        Some(((selected.iter().sum::<f64>() / (selected.len() as f64)) * 100_f64).round() / 100_f64)
     }
 }
 

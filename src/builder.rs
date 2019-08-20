@@ -191,7 +191,7 @@ impl IncompletePeriod {
                 start_time: *start_time,
                 end_time: *end_time,
                 date: date.to_owned(),
-                teff: f64::from(teff_minutes) / 60f64,
+                teff: f64::from(teff_minutes) / 60_f64,
                 limiting_magnitude: lm_avg,
                 field: *field,
                 cloud_factor,
@@ -496,7 +496,7 @@ mod tests {
     use crate::areas::Area;
 
     fn round(a: f64) -> f64 {
-        (a * 100f64).round() / 100f64
+        (a * 100_f64).round() / 100_f64
     }
 
     #[test]
