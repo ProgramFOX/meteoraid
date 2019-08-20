@@ -67,19 +67,19 @@ impl SessionBuilder {
                 }
                 self.current.meteors.push(meteor);
             }
-            Event::Field(field) => match self.current.field {
-                Some(_) => return Err(BuilderError::AlreadyField),
-                None => {
+            Event::Field(field) => {
+                if self.current.field.is_some() {
+                    return Err(BuilderError::AlreadyField);
+                } else {
                     self.current.field = Some(field);
                 }
-            },
+            }
             Event::AreasCounted(counts) => {
                 let maybe_lm_avg = get_limiting_magnitude_avg(&counts);
-                match maybe_lm_avg {
-                    Some(lm_avg) => {
-                        self.current.limiting_magnitudes.push((lm_avg, timestamp));
-                    }
-                    None => return Err(BuilderError::InvalidLm),
+                if let Some(lm_avg) = maybe_lm_avg {
+                    self.current.limiting_magnitudes.push((lm_avg, timestamp));
+                } else {
+                    return Err(BuilderError::InvalidLm);
                 }
             }
             Event::Clouds(clouds) => {
@@ -150,30 +150,27 @@ impl IncompletePeriod {
         if let (Some(start_time), Some(end_time), Some(field), Some(date)) =
             (&self.start_time, &self.end_time, &self.field, &self.date)
         {
-            let teff_minutes =
-                match timestamp::effective_time_minutes(*start_time, *end_time, &self.breaks) {
-                    Some(teff) => teff,
-                    None => {
-                        return Err(BuilderError::InvalidBreaks);
-                    }
-                };
+            let teff_minutes = if let Some(x) =
+                timestamp::effective_time_minutes(*start_time, *end_time, &self.breaks)
+            {
+                x
+            } else {
+                return Err(BuilderError::InvalidBreaks);
+            };
 
-            let lms = match checkpoints_to_durations(
-                &self.limiting_magnitudes,
-                *end_time,
-                &self.breaks,
-            ) {
-                Some(x) => x,
-                None => {
-                    return Err(BuilderError::InvalidBreaks);
-                }
+            let lms = if let Some(x) =
+                checkpoints_to_durations(&self.limiting_magnitudes, *end_time, &self.breaks)
+            {
+                x
+            } else {
+                return Err(BuilderError::InvalidBreaks);
             };
-            let clouds = match checkpoints_to_durations(&self.clouds, *end_time, &self.breaks) {
-                Some(x) => x,
-                None => {
+            let clouds =
+                if let Some(x) = checkpoints_to_durations(&self.clouds, *end_time, &self.breaks) {
+                    x
+                } else {
                     return Err(BuilderError::InvalidBreaks);
-                }
-            };
+                };
 
             let lm_avg = factors::limiting_magnitude(&lms);
             let lm_teff: u32 = lms.iter().map(|x| x.1).sum();
@@ -232,11 +229,10 @@ where
             _ => (T::default(), end),
         };
 
-        let teff = match timestamp::effective_time_minutes(curr.1, next.1, &breaks) {
-            Some(x) => x,
-            None => {
-                return None;
-            }
+        let teff = if let Some(x) = timestamp::effective_time_minutes(curr.1, next.1, &breaks) {
+            x
+        } else {
+            return None;
         };
         result.push((curr.0, teff));
     }

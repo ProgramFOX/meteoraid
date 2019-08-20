@@ -42,24 +42,20 @@ impl Interpreter {
             None => None,
         };
 
-        match code.parse::<u32>() {
-            Ok(number) => {
-                self.time_checkpoint = Some(Timestamp::from_shorthand_int_notation(number));
+        if let Ok(number) = code.parse::<u32>() {
+            self.time_checkpoint = Some(Timestamp::from_shorthand_int_notation(number));
+        } else {
+            if let Some(exact_timestamp) = maybe_exact_timestamp {
+                self.time_checkpoint = Some(exact_timestamp);
             }
-            _ => {
-                if let Some(exact_timestamp) = maybe_exact_timestamp {
-                    self.time_checkpoint = Some(exact_timestamp);
+            match self.time_checkpoint {
+                Some(time) => {
+                    let time_and_event = TimestampedEvent(time, lua::run_code(code, &self.lua)?);
+                    self.session_builder.register_event(time_and_event)?;
                 }
-                match self.time_checkpoint {
-                    Some(time) => {
-                        let time_and_event =
-                            TimestampedEvent(time, lua::run_code(code, &self.lua)?);
-                        self.session_builder.register_event(time_and_event)?;
-                    }
-                    None => return Err(Box::new(InterpreterError::NoTimeCheckpoint)),
-                }
+                None => return Err(Box::new(InterpreterError::NoTimeCheckpoint)),
             }
-        };
+        }
         Ok(())
     }
 

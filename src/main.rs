@@ -105,58 +105,52 @@ fn main() {
         }
     };
 
-    match output_count {
-        Some(output_count_path) => {
-            if force_overwrite || !Path::new(&output_count_path).exists() {
-                match fs::write(&output_count_path, &count_csv) {
-                    Ok(_) => println!("Count CSV written to {}.", &output_count_path),
-                    Err(e) => {
-                        eprintln!("Error while writing count CSV: {}", e);
-                        return;
-                    }
+    if let Some(output_count_path) = output_count {
+        if force_overwrite || !Path::new(&output_count_path).exists() {
+            match fs::write(&output_count_path, &count_csv) {
+                Ok(_) => println!("Count CSV written to {}.", &output_count_path),
+                Err(e) => {
+                    eprintln!("Error while writing count CSV: {}", e);
+                    return;
                 }
-            } else {
-                println!(
-                    "{} already exists and -f flag not set, outputting count CSV to stdout:",
-                    output_count_path
-                );
-                println!("--------------------------------------------");
-                println!("{}", count_csv);
-                println!("--------------------------------------------");
             }
-        }
-        None => {
-            println!("Count CSV:");
+        } else {
+            println!(
+                "{} already exists and -f flag not set, outputting count CSV to stdout:",
+                output_count_path
+            );
             println!("--------------------------------------------");
             println!("{}", count_csv);
             println!("--------------------------------------------");
         }
-    };
+    } else {
+        println!("Count CSV:");
+        println!("--------------------------------------------");
+        println!("{}", count_csv);
+        println!("--------------------------------------------");
+    }
 
-    match output_distr {
-        Some(output_distr_path) => {
-            if force_overwrite || !Path::new(&output_distr_path).exists() {
-                match fs::write(&output_distr_path, &distr_csv) {
-                    Ok(_) => println!("Distribution CSV written to {}.", &output_distr_path),
-                    Err(e) => {
-                        eprintln!("Error while writing distribution CSV: {}", e);
-                    }
+    if let Some(output_distr_path) = output_distr {
+        if force_overwrite || !Path::new(&output_distr_path).exists() {
+            match fs::write(&output_distr_path, &distr_csv) {
+                Ok(_) => println!("Distribution CSV written to {}.", &output_distr_path),
+                Err(e) => {
+                    eprintln!("Error while writing distribution CSV: {}", e);
                 }
-            } else {
-                println!(
-                    "{} already exists and -f flag not set, outputting distribution CSV to stdout:",
-                    output_distr_path
-                );
-                println!("--------------------------------------------");
-                println!("{}", distr_csv);
-                println!("--------------------------------------------");
             }
-        }
-        None => {
-            println!("Distribution CSV:");
+        } else {
+            println!(
+                "{} already exists and -f flag not set, outputting distribution CSV to stdout:",
+                output_distr_path
+            );
             println!("--------------------------------------------");
             println!("{}", distr_csv);
             println!("--------------------------------------------");
         }
-    };
+    } else {
+        println!("Distribution CSV:");
+        println!("--------------------------------------------");
+        println!("{}", distr_csv);
+        println!("--------------------------------------------");
+    }
 }
