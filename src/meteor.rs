@@ -36,38 +36,6 @@ pub enum Shower {
 
 use Shower::*;
 impl Shower {
-    pub fn from_imo_code(imo_code: &str) -> Option<Shower> {
-        match imo_code {
-            "QUA" => Some(Quadrantids),
-            "LYR" => Some(Lyrids),
-            "ETA" => Some(EtaAquarids),
-            "JBO" => Some(JuneBootids),
-            "SDA" => Some(DeltaAquariids),
-            "CAP" => Some(AlphaCapricornids),
-            "PER" => Some(Perseids),
-            "KCG" => Some(KappaCygnids),
-            "AUR" => Some(AlphaAurigids),
-            "SPE" => Some(SeptemberEpsilonPerseids),
-            "OCT" => Some(OctoberCameloparalids),
-            "DRA" => Some(Draconids),
-            "EGE" => Some(EpsilonGeminids),
-            "ORI" => Some(Orionids),
-            "STA" => Some(SouthernTaurids),
-            "NTA" => Some(NorthernTaurids),
-            "LEO" => Some(Leonids),
-            "DAD" => Some(DecemberAlphaDraconids),
-            "MON" => Some(Monocerotids),
-            "HYD" => Some(SigmaHydrids),
-            "GEM" => Some(Geminids),
-            "DLM" => Some(DecemberLeoMinorids),
-            "COM" => Some(ComaBerenicids),
-            "URS" => Some(Ursids),
-            "ANT" => Some(Antihelion),
-            "SPO" => Some(Sporadic),
-            _ => None,
-        }
-    }
-
     pub fn to_imo_code(&self) -> &str {
         match self {
             Quadrantids => "QUA",
