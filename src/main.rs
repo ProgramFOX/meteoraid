@@ -80,7 +80,7 @@ fn main() {
                 match intrprtr.execute_one_line(&line_text) {
                     Ok(_) => {}
                     Err(e) => {
-                        eprintln!("Error while executing code, line {}:\n{}", num, e);
+                        eprintln!("Error while executing code, line {}:\n{}", num + 1, e);
                         return;
                     }
                 };
