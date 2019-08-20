@@ -184,8 +184,7 @@ pub fn get_limiting_magnitude(stars: usize, area: Area) -> Option<f64> {
 pub fn get_limiting_magnitude_avg(counts: &[(usize, Area)]) -> Option<f64> {
     let mut lms: Vec<f64> = counts
         .iter()
-        .map(|count| get_limiting_magnitude(count.0, count.1))
-        .flatten()
+        .flat_map(|count| get_limiting_magnitude(count.0, count.1))
         .collect();
     lms.sort_by(|a, b| a.partial_cmp(b).unwrap());
 
