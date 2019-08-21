@@ -1,8 +1,5 @@
 #![feature(try_trait)]
 
-extern crate clap;
-extern crate rlua;
-
 mod areas;
 mod builder;
 mod distribution;
