@@ -99,7 +99,7 @@ clouds(5)
 
 ### Showers - `showers`
 
-**Required once per period.**
+**Required once at the start of the period.**
 
 Declares which showers you observed, by their three-letter IMO code.
 Note that sporadic meteors (SPO) are not automatically included!
@@ -111,7 +111,7 @@ showers(PER, KCG, ANT, SPO)
 
 ### Field - `fieldC`
 
-**Required once at the beginning of your period.**
+**Required once per period.**
 
 Declares your field (the sky part you're looking at). Takes right ascension as
 first argument and declination as second argument. Floating-point numbers are
