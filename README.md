@@ -9,7 +9,7 @@ Run `meteoraid --help` for the possible command-line arguments.
 
 Example input file:
 
-```
+```lua
 2114
 period_start
 date("11 Aug 2019")
