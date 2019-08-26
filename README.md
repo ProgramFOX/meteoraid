@@ -1,11 +1,11 @@
 # Meteoraid
 
-(Documentation follows soon!)
-
 Assists you with processing visual meteor observations. You provide a sequence of events (meteors, changes in field obstructions, etc.),
 and Meteoraid generates the CSVs with the meteor count and the distribution, that can be sent to the International Meteor Organization.
 
 Run `meteoraid --help` for the possible command-line arguments.
+
+The specification of the input file is provided in [doc/input.md](./tree/master/doc/input.md).
 
 Example input file:
 
