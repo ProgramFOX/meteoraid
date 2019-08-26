@@ -5,7 +5,7 @@ and Meteoraid generates the CSVs with the meteor count and the distribution, tha
 
 Run `meteoraid --help` for the possible command-line arguments.
 
-The specification of the input file is provided in [doc/input.md](./tree/master/doc/input.md).
+The specification of the input file is provided in [doc/input.md](./doc/input.md).
 
 Example input file:
 
