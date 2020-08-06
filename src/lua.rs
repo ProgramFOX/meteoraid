@@ -2,6 +2,7 @@ use crate::areas::Area;
 use crate::field::Field;
 use crate::meteor::{Meteor, Shower};
 use crate::session::Event;
+use crate::stars::STARS;
 use rlua;
 use rlua::{Function, Lua, UserData};
 
@@ -124,6 +125,13 @@ pub fn new_lua() -> Result<Lua, rlua::Error> {
         let field_fn = lua_ctx
             .create_function(|_, (ra, dec): (f64, f64)| Ok(Event::Field(Field { ra, dec })))?;
         globals.set("fieldC", field_fn)?;
+
+        let field_name_fn =
+            lua_ctx.create_function(|_, name: String| match STARS.get(&name[..]) {
+                Some(c) => Ok(Event::Field(Field { ra: c.0, dec: c.1 })),
+                _ => Err(runtime_error("Unknown star name.")),
+            })?;
+        globals.set("fieldN", field_name_fn)?;
 
         let showers_fn = lua_ctx.create_function(
             |_,
@@ -267,5 +275,18 @@ mod tests {
     fn test_lua_8() {
         let l = new_lua().unwrap();
         assert!(run_code("per(3.7)", &l).is_err());
+    }
+
+    #[test]
+    fn test_lua_9() {
+        let l = new_lua().unwrap();
+
+        assert_eq!(
+            run_code("fieldN(\"Deneb\")", &l).unwrap(),
+            Event::Field(Field {
+                ra: 310.35798,
+                dec: 45.280339
+            })
+        );
     }
 }

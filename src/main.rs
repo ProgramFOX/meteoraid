@@ -9,6 +9,7 @@ mod interpreter;
 mod lua;
 mod meteor;
 mod session;
+mod stars;
 mod timestamp;
 
 use clap::{App, Arg};
