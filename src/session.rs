@@ -429,7 +429,7 @@ mod tests {
 
         assert_eq!(
             count_csv,
-            "DATE UT;START;END;Teff;RA;Dec;F;Lm;ANT;;KCG;;PER;;SPO\n12 Aug 2019;2330;30;1;336;52.3;1.05;5.52;-;;C;0;C;7;C;3\n13 Aug 2019;130;200;0.5;298;56;1.08;5.91;C;0;C;0;-;;C;3"
+            "DATE UT;START;END;Teff;RA;Dec;F;Lm;ANT;;KCG;;PER;;SPO\n12 Aug 2019;2330;30;1.0000;336;52.3;1.0500;5.5200;-;;C;0;C;7;C;3\n13 Aug 2019;130;200;0.5000;298;56;1.0800;5.9100;C;0;C;0;-;;C;3"
         );
 
         assert_eq!(
