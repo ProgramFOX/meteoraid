@@ -489,6 +489,46 @@ mod tests {
         assert_eq!(checkpoints_to_durations(&checkpoints, end, &breaks), None);
     }
 
+    #[test]
+    fn test_ctd_8() {
+        let checkpoints: Vec<(u8, Timestamp)> = vec![
+            (
+                1,
+                Timestamp {
+                    hour: 0,
+                    minute: 30,
+                },
+            ),
+            (
+                2,
+                Timestamp {
+                    hour: 1,
+                    minute: 45,
+                },
+            ),
+        ];
+        let end = Timestamp {
+            hour: 2,
+            minute: 00,
+        };
+        let breaks: Vec<(Timestamp, Timestamp)> = vec![(
+            Timestamp {
+                hour: 1,
+                minute: 30,
+            },
+            Timestamp {
+                hour: 1,
+                minute: 45,
+            },
+        )];
+
+        let expected: Vec<(u8, u32)> = vec![(1, 60), (2, 15)];
+        assert_eq!(
+            checkpoints_to_durations(&checkpoints, end, &breaks),
+            Some(expected)
+        );
+    }
+
     use crate::areas::Area;
 
     fn round(a: f64) -> f64 {
@@ -1750,5 +1790,81 @@ mod tests {
             Err(BuilderError::AlreadyDate) => {}
             _ => panic!("register_event does not return AlreadyDate"),
         };
+    }
+
+    #[test]
+    fn test_builder_19() {
+        let mut builder = SessionBuilder::new();
+        let start = Timestamp {
+            hour: 0,
+            minute: 30,
+        };
+        builder
+            .register_event(TimestampedEvent(start, Event::PeriodStart))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::Showers(vec![Shower::Perseids]),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::PeriodDate("7 Aug 2020".to_owned()),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::AreasCounted(vec![(8, Area(14))]),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(start, Event::Clouds(0)))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                start,
+                Event::Field(Field {
+                    ra: 315.0,
+                    dec: 30.0,
+                }),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                Timestamp {
+                    hour: 0,
+                    minute: 46,
+                },
+                Event::BreakStart,
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                Timestamp {
+                    hour: 0,
+                    minute: 52,
+                },
+                Event::BreakEnd,
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                Timestamp {
+                    hour: 0,
+                    minute: 52,
+                },
+                Event::AreasCounted(vec![(7, Area(14))]),
+            ))
+            .unwrap();
+        builder
+            .register_event(TimestampedEvent(
+                Timestamp { hour: 2, minute: 0 },
+                Event::PeriodEnd,
+            ))
+            .unwrap();
+        builder.into_session().unwrap();
     }
 }

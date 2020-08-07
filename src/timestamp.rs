@@ -12,7 +12,7 @@ impl Timestamp {
         }
     }
 
-    pub fn incl_is_between(self, a: Self, b: Self) -> bool {
+    pub fn is_between(self, a: Self, b: Self) -> bool {
         let b_hour = if b.hour < a.hour { b.hour + 24 } else { b.hour };
         let self_hour = if self.hour < a.hour {
             self.hour + 24
@@ -22,7 +22,7 @@ impl Timestamp {
         let a_total_min = a.hour * 60 + a.minute;
         let self_total_min = self_hour * 60 + self.minute;
         let b_total_min = b_hour * 60 + b.minute;
-        a_total_min <= self_total_min && self_total_min <= b_total_min
+        a_total_min < self_total_min && self_total_min <= b_total_min
     }
 
     pub fn to_shorthand_int_notation(self) -> u32 {
@@ -37,11 +37,11 @@ pub fn effective_time_minutes(
 ) -> Option<u32> {
     let mut minutes = end - start;
     for b in breaks {
-        if b.0.incl_is_between(start, end) ^ b.1.incl_is_between(start, end) {
+        if b.0.is_between(start, end) ^ b.1.is_between(start, end) {
             return None;
             // a break can only be entirely outside or inside the start -> end period
         }
-        if b.0.incl_is_between(start, end) {
+        if b.0.is_between(start, end) {
             minutes -= b.1 - b.0;
         }
     }
@@ -217,9 +217,9 @@ mod tests {
             hour: 20,
             minute: 50,
         };
-        assert!(t2.incl_is_between(t1, t3));
-        assert!(!t1.incl_is_between(t2, t3));
-        assert!(!t3.incl_is_between(t1, t2));
+        assert!(t2.is_between(t1, t3));
+        assert!(!t1.is_between(t2, t3));
+        assert!(!t3.is_between(t1, t2));
     }
 
     #[test]
@@ -236,9 +236,9 @@ mod tests {
             hour: 0,
             minute: 50,
         };
-        assert!(t2.incl_is_between(t1, t3));
-        assert!(!t1.incl_is_between(t2, t3));
-        assert!(!t3.incl_is_between(t1, t2));
+        assert!(t2.is_between(t1, t3));
+        assert!(!t1.is_between(t2, t3));
+        assert!(!t3.is_between(t1, t2));
     }
 
     #[test]
@@ -252,9 +252,9 @@ mod tests {
             hour: 00,
             minute: 50,
         };
-        assert!(t2.incl_is_between(t1, t3));
-        assert!(!t1.incl_is_between(t2, t3));
-        assert!(!t3.incl_is_between(t1, t2));
+        assert!(t2.is_between(t1, t3));
+        assert!(!t1.is_between(t2, t3));
+        assert!(!t3.is_between(t1, t2));
     }
 
     #[test]
@@ -268,7 +268,7 @@ mod tests {
             hour: 23,
             minute: 50,
         };
-        assert!(!t2.incl_is_between(t1, t3));
+        assert!(!t2.is_between(t1, t3));
     }
 
     #[test]
@@ -285,8 +285,8 @@ mod tests {
             hour: 23,
             minute: 50,
         };
-        assert!(t2.incl_is_between(t1, t3));
-        assert!(t1.incl_is_between(t2, t3));
+        assert!(!t2.is_between(t1, t3));
+        assert!(!t1.is_between(t2, t3));
     }
 
     #[test]
@@ -303,8 +303,8 @@ mod tests {
             hour: 23,
             minute: 50,
         };
-        assert!(t2.incl_is_between(t1, t3));
-        assert!(t3.incl_is_between(t1, t2));
+        assert!(t2.is_between(t1, t3));
+        assert!(t3.is_between(t1, t2));
     }
 
     #[test]
@@ -313,7 +313,7 @@ mod tests {
             hour: 23,
             minute: 18,
         };
-        assert!(t1.incl_is_between(t1, t1));
+        assert!(!t1.is_between(t1, t1));
     }
 
     #[test]
