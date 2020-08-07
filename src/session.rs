@@ -131,7 +131,7 @@ impl Session {
                 };
             }
             count_csv_parts.push(format!(
-                "{};{};{};{};{};{};{};{};{}",
+                "{};{};{};{:.4};{};{};{:.4};{:.4};{}",
                 period.date,
                 period.start_time.to_shorthand_int_notation(),
                 period.end_time.to_shorthand_int_notation(),
