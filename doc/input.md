@@ -160,7 +160,7 @@ magnitude as argument.
 
 ```lua
 per(3) -- a Perseid of magnitude 3
-spor(0.5) -- a sporadic meteor of magnitude 0.5
+spo(0.5) -- a sporadic meteor of magnitude 0.5
 kcg(-1) -- a Kappa Cygnid of magnitude -1
 ```
 
